@@ -2,18 +2,43 @@ package apiFiles
 
 import (
 	"net/http"
+	"text/template"
 
-	"github.com/fatih/color"
+	"github.com/labstack/echo/v4"
 )
 
-// initializarea serverului cu toate functiile sale
-func ServerInit() {
-	//initializare pagina principala
-	serverFile := http.FileServer(http.Dir("../HTML&CSS"))
-	http.Handle("/", serverFile)
+// porneste serverului cu toate functiile sale
+func ServerStart() {
+	app := echo.New()
 
-	color.Green("\nServerul a pornit...\n")
+	//initializare template randerer
+	t := &Template{
+		templates: template.Must(template.ParseGlob("./views/index.html")),
+	}
+	app.Renderer = t
+	app.GET("/", renderIndex)
+	app.GET("/genKey", generateKey)
 
-	err := http.ListenAndServe(":8080", nil)
-	check(err)
+	app.Logger.Fatal(app.Start(":8080"))
 }
+
+// Afiseaza index.html cand este accesata pagina principala
+func renderIndex(c echo.Context) error {
+
+	cheie := existaSauGenereazaCheie()
+
+	key := map[string]interface{}{
+		"Cheie": cheie,
+	}
+
+	return c.Render(http.StatusOK, "apiKey", key)
+}
+
+// Genereaza o cheie noua dupa ce butonul de generare este apasat
+func generateKey(c echo.Context) error {
+	schimbareCheie()
+
+	return nil
+}
+
+// onclick="setTimeout(()=>(window.location = window.location.href), 50)"

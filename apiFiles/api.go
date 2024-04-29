@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 )
 
 //Un API folosit pentru a adauga haine intr-un shop online sau fizic
@@ -35,34 +35,34 @@ func check(err error) {
 }
 
 // Functie care returneaza hainele ca un JSON
-func returneazaHaine(c *gin.Context) {
-	c.IndentedJSON(http.StatusOK, haine)
+func returneazaHaine(c echo.Context) {
+	c.JSON(http.StatusOK, haine)
 }
 
 // functie pentru a posta o haina
-func posteazaHaine(c *gin.Context) {
+func posteazaHaine(c echo.Context) error {
 	var hainaNoua haina
 
-	err := c.BindJSON(&hainaNoua)
+	err := c.Bind(&hainaNoua)
 	check(err)
 
 	haine = append(haine, hainaNoua)
 
-	c.IndentedJSON(http.StatusCreated, hainaNoua)
+	return c.JSON(http.StatusCreated, hainaNoua)
 }
 
 // functie care returneaza o haina dupa id-ul lui
-func returneazaHainaDupaId(c *gin.Context) {
+func returneazaHainaDupaId(c echo.Context) error {
 	id := c.Param("id")
 	idInt, err := strconv.ParseInt(id, 10, 64)
 	check(err)
 	for _, haina := range haine {
 		if haina.ID == idInt {
-			c.IndentedJSON(http.StatusOK, haina)
-			return
+			c.JSON(http.StatusOK, haina)
+			return nil
 		}
 	}
-	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "Haina nu exista"})
+	return echo.ErrBadRequest
 }
 
 /* func main() {
