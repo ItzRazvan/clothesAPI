@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/htmx.org@1.9.6"
+        integrity="sha384-FhXw7b6AlE/jyjlZH5iHa/tTe9EpJ1Y55RjcgPbjeWMskSxZt1v9qkxLJWNJaGni"
+        crossorigin="anonymous"></script>
+    <title>Pagina Principala</title>
+</head>
+
+<body>
+    <h1 class="titlu">LogIn Here</h1>
+    <div class="containers">
+        <label>Email</label><input type="text" name="email" class="form">
+        <label>Parola</label><input type="password" name="parola" class="form">
+        <div class="butoane">
+            <input type="submit" value="Submit" class="submit">
+            <button onclick="signin()">SignIn</button>
+        </div>
+    </div>
+</body>
+
+<style>
+    
+    :root {
+        --bg: #4F4557;
+        --gri: #393646;
+        --culoare: #6D5D6E;
+        --txt: #F4EEE0;
+    }
+
+    body {
+        background-color: var(--gri);
+    }
+
+    label {
+        color: var(--txt);
+    }
+
+    .titlu {
+        color: var(--txt);
+        text-align: center;
+        font-size: 2.9rem;
+    }
+
+    .containers {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 65vh;
+        gap: 0.3rem;
+    }
+
+    .submit{
+        background-color: #EA4C89;
+        border-radius: 8px;
+        border-style: none;
+        box-sizing: border-box;
+        color: #FFFFFF;
+        cursor: pointer;
+        display: inline-block;
+        font-family: "Haas Grot Text R Web", "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 0.75rem;
+        height: 4.15vh;
+        list-style: none;
+        margin: 0;
+    }
+
+    .submit:hover{
+        background-color: #FF6BA6;
+    }
+
+    button{
+        background-color: #EA4C89;
+        border-radius: 8px;
+        border-style: none;
+        box-sizing: border-box;
+        color: #FFFFFF;
+        cursor: pointer;
+        display: inline-block;
+        font-family: "Haas Grot Text R Web", "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 0.75rem;
+        height: 4.15vh;
+        list-style: none;
+        margin: 0;
+    }
+    
+    button:hover{
+        background-color: #FF6BA6;
+    }
+    .form{
+        border-radius: 8px;
+        border-style: none;
+        box-sizing: border-box;
+        color: (--gri);
+        cursor: pointer;
+        display: inline-block;
+        font-family: "Haas Grot Text R Web", "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 0.75rem;
+        height: 4.15vh;
+        width: 15vw;
+        list-style: none;
+        margin-bottom: 0.7rem;
+    }
+
+    .butoane{
+        display: flex;
+        flex-direction: row;
+        gap: 1.25vw;
+    }
+</style>
+
+<script>
+    function signin() {
+        window.location.href = "http://localhost:8080/signin";
+    }
+</script>
+
+</html>

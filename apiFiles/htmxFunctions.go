@@ -20,6 +20,20 @@ func (t *Template) Render(w io.Writer, index string, data interface{}, c echo.Co
 	return t.templates.ExecuteTemplate(w, index, data)
 }
 
+// Genereaza un string care urmeaza sa fie hashuit
+func genereazaStringRandom(size int) string {
+	//caracterele folosite
+	const caractere = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()_+{}:<>?,./;[]'-=`~"
+
+	a := make([]byte, size)
+
+	for i := range a {
+		a[i] = caractere[rand.Intn(len(caractere))]
+	}
+
+	return string(a)
+}
+
 func genereazaCheieRandom() string {
 	//generate an random string of size 25
 	randString := genereazaStringRandom(25)
@@ -37,20 +51,6 @@ func generateToken(text string) string {
 	}
 
 	return string(hash)
-}
-
-// Genereaza un string care urmeaza sa fie hashuit
-func genereazaStringRandom(size int) string {
-	//caracterele folosite
-	const caractere = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()_+{}:<>?,./;[]'-=`~"
-
-	a := make([]byte, size)
-
-	for i := range a {
-		a[i] = caractere[rand.Intn(len(caractere))]
-	}
-
-	return string(a)
 }
 
 // Functia verifica daca cheia este generata, pentru a nu genera inca una, doar in caz ca unserul apasa pe butonul de generare
