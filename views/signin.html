@@ -13,12 +13,12 @@
 <body>
     <h1 class="titlu">SignIn Here</h1>
     <div class="containers">
-        <form id="signinForm">
+        <form id="signinForm" method="POST">
             <label>Email</label><input type="text" name="email" class="form">
             <label>Parola</label><input type="password" name="parola" class="form">
         </form>
         <div class="butoane">
-            <input type="submit" value="Submit" form="signinForm" class="submit" hx-post="/signin" hx-target="#dummy" hx-include="#signinForm" onclick="refresh()">
+            <button id="submitBtn">Submit</button>
             <button onclick="login()">LogIn</button>
         </div>
     </div>
@@ -134,11 +134,18 @@
     function login() {
         window.location.href = "http://localhost:8080/login";
     }
-    function refresh(){
-        setTimeout(() => {
-            window.location.href = "http://localhost:8080/";
-        }, 200)
-    }
+
+  document.getElementById("submitBtn").addEventListener("click", () =>{
+        fetch("/signin", {
+            method: "POST",
+            body: new FormData(document.getElementById("signinForm"))
+        }).then((response) => {
+            console.log(response);
+            if(response.status == 200){
+                window.location.href = response.url;
+            }
+        });
+    }); 
 </script>
 
 </html>

@@ -1,6 +1,7 @@
 package apiFiles
 
 import (
+	"encoding/json"
 	"net/http"
 	"text/template"
 
@@ -17,7 +18,8 @@ func ServerStart() {
 	}
 	app.Renderer = t
 	app.GET("/", renderIndex)
-	app.GET("/genKey", generateKey)
+	app.GET("/genKey", getKey)
+	app.GET("/logout", logout)
 
 	app.GET("/login", renderLogin)
 	app.GET("/signin", renderSingin)
@@ -30,14 +32,14 @@ func ServerStart() {
 
 // Afiseaza index.html cand este accesata pagina principala
 func renderIndex(c echo.Context) error {
-
-	//cheie := existaSauGenereazaCheie()
-
-	key := map[string]interface{}{
-		"Cheie": "1234567890",
-	}
-
+	//verifica daca userul este logat
 	if isLoggedIn(c) {
+		cheie := getCheieFromDB(c)
+
+		key := map[string]interface{}{
+			"Cheie": cheie,
+		}
+
 		//randeaza pagina principala\
 		return c.Render(http.StatusOK, "index.html", key)
 	} else {
@@ -66,7 +68,28 @@ func renderSingin(c echo.Context) error {
 }
 
 // Genereaza o cheie noua dupa ce butonul de generare este apasat
-func generateKey(c echo.Context) error {
-	schimbareCheie()
+/*func generateKey(c echo.Context) error {
+	schimbareCheie(c, 0)
+	refreshPage(c)
 	return nil
+}*/
+
+// funcite care genereaza cheie noua
+func getKey(c echo.Context) error {
+	schimbareCheie(c, 0)
+	cheie := getCheieFromDB(c)
+	js, err := json.Marshal(cheie)
+	check(err)
+	c.Response().Writer.Header().Set("Content-Type", "application/json")
+	c.Response().Writer.Write(js)
+	return nil
+}
+
+// Functie pentru apasarea butonului de logout
+func logout(c echo.Context) error {
+	//stergem cookie ul
+	removeCookie(c)
+
+	//redirectam catre pagina de login
+	return c.Redirect(http.StatusSeeOther, "/login")
 }

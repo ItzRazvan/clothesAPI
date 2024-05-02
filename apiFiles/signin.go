@@ -1,8 +1,6 @@
 package apiFiles
 
 import (
-	"fmt"
-
 	emailverifier "github.com/AfterShip/email-verifier"
 	"github.com/labstack/echo/v4"
 	passwordValidator "github.com/wagslane/go-password-validator"
@@ -15,8 +13,6 @@ func signinTry(c echo.Context) error {
 	//preluam datele din formular
 	email := c.FormValue("email")
 	parola := c.FormValue("parola")
-
-	fmt.Println(email, parola)
 
 	//verificam daca parola este destul de puternica
 	const minEntropy float64 = 70
@@ -58,9 +54,17 @@ func signinTry(c echo.Context) error {
 	_, err = db.Exec("CREATE UNIQUE INDEX email ON users (email)")
 	check(err)
 
-	//daca totul este ok, cream un cookie pentru a tine minte ca userul este logat
-	createCookie(c)
+	//luam id ul userului
+	var id int
+	err = db.QueryRow("SELECT id FROM users WHERE email = ?", email).Scan(&id)
+	check(err)
 
-	//daca totul este ok, returnam un mesaj de succes
-	return c.String(200, "Inregistrare cu succes")
+	//daca totul este ok, cream un cookie pentru a tine minte ca userul este logat
+	createCookie(c, id)
+
+	//generam o noua cheie pentru user
+	schimbareCheie(c, id)
+
+	//Redirectam catre pagina principala
+	return c.Redirect(302, "/")
 }

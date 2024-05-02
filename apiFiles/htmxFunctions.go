@@ -54,7 +54,7 @@ func generateToken(text string) string {
 }
 
 // Functia verifica daca cheia este generata, pentru a nu genera inca una, doar in caz ca unserul apasa pe butonul de generare
-func existaSauGenereazaCheie() string {
+/*func existaSauGenereazaCheie() string {
 	db := connectToSQL()
 	defer db.Close()
 
@@ -72,16 +72,34 @@ func existaSauGenereazaCheie() string {
 		check(err)
 		return cheieNoua
 	}
-}
+} */
 
-func schimbareCheie() {
+func schimbareCheie(c echo.Context, id int) {
 	db := connectToSQL()
 	defer db.Close()
 
 	cheie := genereazaCheieRandom()
 
-	_, err := db.Exec("UPDATE cheie SET value = ?", cheie)
+	if id == 0 {
+		id = getIdFromCookie(c)
+	}
+
+	_, err := db.Exec("UPDATE users SET cheie = ? WHERE id = ?", cheie, id)
 	check(err)
+}
+
+// fucntie care ia cheia din baza de date
+func getCheieFromDB(c echo.Context) string {
+	db := connectToSQL()
+	defer db.Close()
+
+	id := getIdFromCookie(c)
+
+	var cheie string
+	err := db.QueryRow("SELECT cheie FROM users WHERE id = ?", id).Scan(&cheie)
+	check(err)
+
+	return cheie
 }
 
 // Functie care te conecteaza la baza de date

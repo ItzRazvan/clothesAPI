@@ -15,9 +15,10 @@ func loginTry(c echo.Context) error {
 	db := connectToSQL()
 	defer db.Close()
 
+	var id int
 	var emailDinDB string
 	var parolaDinDB string
-	err := db.QueryRow("SELECT email, parola FROM users WHERE email = ?", email).Scan(&emailDinDB, &parolaDinDB)
+	err := db.QueryRow("SELECT id, email, parola FROM users WHERE email = ?", email).Scan(&id, &emailDinDB, &parolaDinDB)
 
 	if err != nil {
 		return c.String(400, "Emailul sau parola sunt gresite")
@@ -30,8 +31,8 @@ func loginTry(c echo.Context) error {
 	}
 
 	//daca totul e corect, crean un cookie pentru a tine minte ca userul este logat
-	createCookie(c)
+	createCookie(c, id)
 
-	//Returnam un mesaj de succes
-	return c.String(200, "Logare cu succes")
+	//Redirectam userul catre pagina principala
+	return c.Redirect(302, "/")
 }

@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
     <script src="https://unpkg.com/htmx.org@1.9.6"
         integrity="sha384-FhXw7b6AlE/jyjlZH5iHa/tTe9EpJ1Y55RjcgPbjeWMskSxZt1v9qkxLJWNJaGni"
         crossorigin="anonymous"></script>
@@ -12,7 +12,10 @@
 </head>
 
 <body>
-    <h1 class="titlu">clohesAPI page</h1>
+    <div class="upperContainer">
+        <h1 class="titlu">clohesAPI page</h1>
+        <button class="logout" id="logoutBtn">Logout</button>
+    </div>
     <div class="containers">
         <div class="generateKey">
             <p class="apiKeyText">This is your api key:</p>
@@ -21,7 +24,7 @@
 
             <div class="butoane">
                 <button class="copy" onclick="copyFunc()">Copy</button>
-                <button class="generate" hx-get='/genKey' hx-target='#dummy' onclick="generateRefrash()">Generate
+                <button class="generate" id="genKey">Generate
                     another
                     key</button>
             </div>
@@ -77,10 +80,22 @@
 
 
     .titlu {
-        display: flex;
         justify-content: center;
+        text-align: center;
         font-size: 3rem;
         color: var(--txt)
+    }
+    
+    .logout {
+        position: absolute;
+        right: 2vw;
+    }
+
+    .upperContainer {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
     }
 
     .generateKey {
@@ -120,11 +135,28 @@
         navigator.clipboard.writeText(value);
     }
 
-    //refrash la pagina dupa ce cheia a fost generata
-    function generateRefrash() {
-        setTimeout(() => (location.reload()), 100);
-        setTimeout(() => (location.reload()), 200);
-    }
+    //genereaza o noua cheie
+    document.getElementById("genKey").addEventListener("click", function () {
+        fetch("/genKey", {
+            method: "GET",
+        }).then((response) => {
+            if (response.ok) {
+                response.json().then((data) => {
+                    document.getElementById("cheie").innerText = data;
+                });
+            }
+        });
+    });
+
+    document.getElementById("logoutBtn").addEventListener("click", function () {
+        fetch("/logout", {
+            method: "GET",
+        }).then((response) => {
+            if (response.ok) {
+                window.location.href = response.url;
+            }
+        });
+    });
 </script>
 
 </html>
