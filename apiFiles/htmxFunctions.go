@@ -55,14 +55,12 @@ func generateToken(text string) string {
 
 // Functia verifica daca cheia este generata, pentru a nu genera inca una, doar in caz ca unserul apasa pe butonul de generare
 func existaSauGenereazaCheie() string {
-	db, err := sql.Open("mysql", "root:razvan2007@tcp(127.0.0.1:3306)/clothesAPI")
-	check(err)
-	err = db.Ping()
-	check(err)
+	db := connectToSQL()
+	defer db.Close()
 
 	//verificam daca exista deja o cheie in baza de date
 	var cheieDinDB string
-	err = db.QueryRow("SELECT value FROM cheie").Scan(&cheieDinDB)
+	err := db.QueryRow("SELECT value FROM cheie").Scan(&cheieDinDB)
 
 	//daca exista, returnam cheia
 	if err == nil {
@@ -77,13 +75,20 @@ func existaSauGenereazaCheie() string {
 }
 
 func schimbareCheie() {
-	db, err := sql.Open("mysql", "root:razvan2007@tcp(127.0.0.1:3306)/clothesAPI")
-	check(err)
-	err = db.Ping()
-	check(err)
+	db := connectToSQL()
+	defer db.Close()
 
 	cheie := genereazaCheieRandom()
 
-	_, err = db.Exec("UPDATE cheie SET value = ?", cheie)
+	_, err := db.Exec("UPDATE cheie SET value = ?", cheie)
 	check(err)
+}
+
+// Functie care te conecteaza la baza de date
+func connectToSQL() *sql.DB {
+	db, err := sql.Open("mysql", "root:razvan2007@tcp(127.0.0.1:3306)/clothesAPI")
+	check(err)
+	db.Ping()
+	check(err)
+	return db
 }

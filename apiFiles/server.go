@@ -18,8 +18,12 @@ func ServerStart() {
 	app.Renderer = t
 	app.GET("/", renderIndex)
 	app.GET("/genKey", generateKey)
+
 	app.GET("/login", renderLogin)
 	app.GET("/signin", renderSingin)
+
+	app.POST("/login", loginTry)
+	app.POST("/signin", signinTry)
 
 	app.Logger.Fatal(app.Start(":8080"))
 }
@@ -33,24 +37,32 @@ func renderIndex(c echo.Context) error {
 		"Cheie": "1234567890",
 	}
 
-	if isLoggedIn() {
-		//randeaza pagina principala
+	if isLoggedIn(c) {
+		//randeaza pagina principala\
 		return c.Render(http.StatusOK, "index.html", key)
 	} else {
 		//randeaza pagina de login
-		c.Redirect(http.StatusMovedPermanently, "/login")
+		http.Redirect(c.Response(), c.Request(), "/login", http.StatusSeeOther)
 		return nil
 	}
 }
 
 // Functie care randeaza pagina de login
 func renderLogin(c echo.Context) error {
-	return c.Render(http.StatusOK, "login.html", nil)
+	if !isLoggedIn(c) {
+		return c.Render(http.StatusOK, "login.html", nil)
+	}
+	http.Redirect(c.Response(), c.Request(), "/", http.StatusSeeOther)
+	return nil
 }
 
 // Functie care randeaza pagina de signin
 func renderSingin(c echo.Context) error {
-	return c.Render(http.StatusOK, "signin.html", nil)
+	if !isLoggedIn(c) {
+		return c.Render(http.StatusOK, "signin.html", nil)
+	}
+	http.Redirect(c.Response(), c.Request(), "/", http.StatusSeeOther)
+	return nil
 }
 
 // Genereaza o cheie noua dupa ce butonul de generare este apasat

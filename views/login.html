@@ -13,13 +13,16 @@
 <body>
     <h1 class="titlu">LogIn Here</h1>
     <div class="containers">
-        <label>Email</label><input type="text" name="email" class="form">
-        <label>Parola</label><input type="password" name="parola" class="form">
+        <form id="loginForm">
+            <label>Email</label><input type="text" name="email" class="form">
+            <label>Parola</label><input type="password" name="parola" class="form">
+        </form>
         <div class="butoane">
-            <input type="submit" value="Submit" class="submit">
+            <input type="submit" value="Submit" class="submit" from="loginFrom" hx-post="/login" hx-target="#dummy" hx-include="#loginForm" onclick="refresh()">
             <button onclick="signin()">SignIn</button>
         </div>
     </div>
+    <div id="dummy"></div>
 </body>
 
 <style>
@@ -37,6 +40,7 @@
 
     label {
         color: var(--txt);
+        font-size: 1.5rem;
     }
 
     .titlu {
@@ -51,10 +55,17 @@
         justify-content: center;
         align-items: center;
         height: 65vh;
-        gap: 0.3rem;
+        gap: 1.25vh;
     }
-
+    #loginForm{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 1.25vh;
+    }
     .submit{
+        width: 6vw;
         background-color: #EA4C89;
         border-radius: 8px;
         border-style: none;
@@ -74,6 +85,7 @@
     }
 
     button{
+        width: 6vw;
         background-color: #EA4C89;
         border-radius: 8px;
         border-style: none;
@@ -99,23 +111,33 @@
         cursor: pointer;
         display: inline-block;
         font-family: "Haas Grot Text R Web", "Helvetica Neue", Helvetica, Arial, sans-serif;
-        font-size: 0.75rem;
+        font-size: 1rem;
         height: 4.15vh;
-        width: 15vw;
+        width: 20vw;
         list-style: none;
         margin-bottom: 0.7rem;
+        padding-left: 0.5vw;
     }
 
     .butoane{
+        margin-top: 1.75vh;
         display: flex;
         flex-direction: row;
         gap: 1.25vw;
+    }
+    #dummy{
+        display: none;
     }
 </style>
 
 <script>
     function signin() {
         window.location.href = "http://localhost:8080/signin";
+    }
+    function refresh(){
+        setTimeout(() => {
+            window.location.href = "http://localhost:8080/";
+        }, 200);
     }
 </script>
 
