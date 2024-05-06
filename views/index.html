@@ -29,6 +29,10 @@
                     key</button>
             </div>
         </div>
+        <div class="testApi">
+            <p class="testApiText">Test the API:</p>
+            <button class="testBtn" id="testApi" onclick="test()">Test</button>
+        </div>
     </div>
     <div id="dummy"></div>
 </body>
@@ -99,7 +103,6 @@
     }
 
     .generateKey {
-        margin-top: 32.5vh;
         margin-left: 2vw;
     }
 
@@ -126,6 +129,26 @@
     #dummy {
         display: none;
     }
+    .containers {
+        margin-top: 32.5vh;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
+    .testApi {
+        position: absolute;
+        right: 10vw;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap : 1.25vw;
+    }
+    .testApiText {
+        font-size: 1.65rem;
+    }
+    .testBtn {
+        font-size: 1.25rem;
+    }
 </style>
 
 <script>
@@ -133,6 +156,11 @@
     function copyFunc() {
         var value = document.getElementById("cheie").innerText;
         navigator.clipboard.writeText(value);
+    }
+
+    //testeaza api-ul
+    function test(){
+        window.location.href = "http://localhost:8080/apiTest";
     }
 
     //genereaza o noua cheie

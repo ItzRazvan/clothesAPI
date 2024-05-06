@@ -2,6 +2,7 @@ package apiFiles
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
 	"text/template"
 
@@ -26,6 +27,13 @@ func ServerStart() {
 
 	app.POST("/login", loginTry)
 	app.POST("/signin", signinTry)
+
+	app.GET("/apiTest", renderApiTest)
+
+	//Functiile din api.go
+	app.GET("/api/haine", returneazaHaine)
+	app.POST("/api/POST", posteazaHaine)
+	app.GET("/api/haine:id", returneazaHainaDupaId)
 
 	app.Logger.Fatal(app.Start(":8080"))
 }
@@ -92,4 +100,32 @@ func logout(c echo.Context) error {
 
 	//redirectam catre pagina de login
 	return c.Redirect(http.StatusSeeOther, "/login")
+}
+
+// Functie care randeaza pagina de testare a api ului
+func renderApiTest(c echo.Context) error {
+	//vom trimite toate hainele in pagina
+
+	//incepem prin a face un rqeuest catre api pentru a lua toate hainele
+	cheie := getCheieFromDB(c)
+	if cheie == "" {
+		c.Redirect(302, "/login")
+		return nil
+	}
+	linkPtReq := "http://localhost:8080/api/haine?key=" + cheie
+	resp, err := http.Get(string(linkPtReq))
+	check(err)
+	body, err := io.ReadAll(resp.Body)
+	check(err)
+	resp.Body.Close()
+
+	// Unmarshal the JSON response
+	var haine []haina
+	err = json.Unmarshal(body, &haine)
+	check(err)
+
+	// Now you can use 'haine' in your template
+	return c.Render(http.StatusOK, "apiTest.html", map[string]interface{}{
+		"haine": haine,
+	})
 }

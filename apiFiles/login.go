@@ -36,3 +36,4 @@ func loginTry(c echo.Context) error {
 	//Redirectam userul catre pagina principala
 	return c.Redirect(302, "/")
 }
+

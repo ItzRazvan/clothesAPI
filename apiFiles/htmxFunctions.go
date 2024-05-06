@@ -81,7 +81,12 @@ func schimbareCheie(c echo.Context, id int) {
 	cheie := genereazaCheieRandom()
 
 	if id == 0 {
-		id = getIdFromCookie(c)
+		idBun := getIdFromCookie(c)
+		id = idBun
+		if id == 0 {
+			c.Redirect(302, "/login")
+			return
+		}
 	}
 
 	_, err := db.Exec("UPDATE users SET cheie = ? WHERE id = ?", cheie, id)
@@ -94,6 +99,10 @@ func getCheieFromDB(c echo.Context) string {
 	defer db.Close()
 
 	id := getIdFromCookie(c)
+	if id == 0 {
+		c.Redirect(302, "/login")
+		return ""
+	}
 
 	var cheie string
 	err := db.QueryRow("SELECT cheie FROM users WHERE id = ?", id).Scan(&cheie)
