@@ -2,6 +2,7 @@ package apiFiles
 
 import (
 	"database/sql"
+	"fmt"
 	"io"
 	"log"
 	"math/rand"
@@ -81,7 +82,7 @@ func schimbareCheie(c echo.Context, id int) {
 	cheie := genereazaCheieRandom()
 
 	if id == 0 {
-		idBun := getIdFromCookie(c)
+		idBun := getIdFromSession(c)
 		id = idBun
 		if id == 0 {
 			c.Redirect(302, "/login")
@@ -98,9 +99,9 @@ func getCheieFromDB(c echo.Context) string {
 	db := connectToSQL()
 	defer db.Close()
 
-	id := getIdFromCookie(c)
+	id := getIdFromSession(c)
 	if id == 0 {
-		c.Redirect(302, "/login")
+		fmt.Println("Userul nu este detectat logat")
 		return ""
 	}
 

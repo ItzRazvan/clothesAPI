@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>apiTest</title>
+</head>
+<body>
+    <div class="formCont">
+         <form id="postForm" method="post">
+        <div class="f">
+            <label>Nume</label><input type="text" name="Nume" class="form">
+        </div>
+        <div class="f">
+            <label>Tip</label><input type="Number" name="Tip" class="form">
+        </div>
+        <div class="f">
+            <label>Marime</label><input type="text" name="Marime" class="form">
+        </div>
+        <div class="f">
+            <label>Culoare</label><input type="text" name="Culoare" class="form">
+        </div>
+        <div class="fsex">
+            <div class="b">
+                <label>Barbat</label><input type="radio" name="Sex" class="form" value="male" id="male">
+            </div>
+            <div class="f">
+                <label>Femeie</label><input type="radio" name="Sex" class="form" value="female" id="female">
+            </div>  
+        </div>
+        <div class="f">
+            <label>Pret</label><input type="number" name="Pret" class="form">
+        </div>
+    </form>
+        <button id="submitBtn">Submit</button>
+    </div>
+
+    <div class="inapoi">
+        <button class="Inapoi" id="Inapoi">Inapoi</button>
+    </div>
+    
+</body>
+<style>
+    :root {
+        --bg: #4F4557;
+        --gri: #393646;
+        --culoare: #6D5D6E;
+        --txt: #F4EEE0;
+    }
+
+    body {
+        background-color: var(--gri);
+    }
+
+    p {
+        color: var(--txt)
+    }
+
+    button{
+        background-color: #EA4C89;
+        border-radius: 8px;
+        border-style: none;
+        box-sizing: border-box;
+        color: #FFFFFF;
+        position: absolute;
+        height: 4vh;
+        width: 9vw;
+    }
+    #submitBtn{
+        bottom: 1.25vh;
+        right: 1.25vh;
+    }
+    #submitBtn:hover{
+        background-color: #FF6BBD;
+        cursor: pointer;
+    }
+
+    label{
+        color: var(--txt);
+        font-size: 1.25rem;
+    }
+
+    .Inapoi{
+        position: absolute;
+        bottom: 1.25vh;
+        left: 1.25vh;
+    }
+    .Inapoi:hover{
+        background-color: #FF6BBD;
+        cursor: pointer;
+    }
+    .postForm{
+        display: flex;
+        flex-direction: column;
+        gap: 1.25vh;
+        align-items: center;
+        justify-content: center;
+    }
+    .formCont{
+        margin-top: 12.5vh;
+    }
+    .f{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 1.25vh;
+        margin-top: 1.75vh;
+    }
+
+    .fsex{
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.75vh;
+
+    }
+    .b{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 1.25vh;
+    }
+    .f{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 1.25vh;
+    }
+    .form{
+        width: 20vw;
+        height: 4vh;
+        border-radius: 8px;
+        border-style: none;
+        box-sizing: border-box;
+        padding-left: 1.25vh;
+    }
+</style>
+<script>
+    //transforma datele in json si trimite requestul
+    document.getElementById("submitBtn").addEventListener("click", function(){ 
+        fetch("/api/posteaza", {
+            method: "POST",
+            credentials: "include",
+            body: new FormData(document.getElementById("postForm"))
+        }).then((response) => {
+            if(response.status == 200){
+                window.location.href = response.url;
+            }
+        });
+    });
+
+    document.getElementById("Inapoi").addEventListener("click", function(){
+        window.location.href = "/apiTest";
+    });
+</script>
+</html>

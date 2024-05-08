@@ -138,6 +138,7 @@
     document.getElementById("submitBtn").addEventListener("click", () =>{
         fetch("/login", {
             method: "POST",
+            credentials: "include",
             body: new FormData(document.getElementById("loginForm"))
         }).then((response) => {
             if(response.ok){

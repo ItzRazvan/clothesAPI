@@ -1,14 +1,6 @@
 package apiFiles
 
-import (
-	"net/http"
-	"strconv"
-	"time"
-
-	"github.com/labstack/echo/v4"
-)
-
-func createCookie(c echo.Context, id int) error {
+/*func createCookie(c echo.Context, id int) error {
 	cookie := new(http.Cookie)
 	cookie.Name = "session"
 	//Stocam id ul userului in cookie
@@ -22,10 +14,10 @@ func createCookie(c echo.Context, id int) error {
 func isLoggedIn(c echo.Context) bool {
 	_, err := c.Cookie("session")
 	return err == nil
-}
+} */
 
 // Functie care returneaza id ul userului din cookie (id ul este stocat acolo)
-func getIdFromCookie(c echo.Context) int {
+/*func getIdFromCookie(c echo.Context) int {
 	if isLoggedIn(c) {
 		cookie, err := c.Cookie("session")
 		check(err)
@@ -35,10 +27,10 @@ func getIdFromCookie(c echo.Context) int {
 	}
 	return 0
 
-}
+} */
 
 // Functie care sterge cookie ul cand userul se delogeaza
-func removeCookie(c echo.Context) {
+/*func removeCookie(c echo.Context) {
 	cookie, err := c.Cookie("session")
 	if err != nil {
 		return
@@ -49,3 +41,4 @@ func removeCookie(c echo.Context) {
 	cookie.MaxAge = -1
 	c.SetCookie(cookie)
 }
+*/

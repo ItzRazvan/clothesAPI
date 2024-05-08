@@ -138,9 +138,9 @@
   document.getElementById("submitBtn").addEventListener("click", () =>{
         fetch("/signin", {
             method: "POST",
+            credentials: "include",
             body: new FormData(document.getElementById("signinForm"))
         }).then((response) => {
-            console.log(response);
             if(response.status == 200){
                 window.location.href = response.url;
             }

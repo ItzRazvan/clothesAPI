@@ -18,7 +18,7 @@ import (
 // Pentru a vedea o haina dupa id, vei face un request GET la adresa http://site/api/haina/:id?key=...
 // Vei avea nevoie de un struct haina, deoarece api ul va returna hainele in forma de struct din baza de date
 type haina struct {
-	Pret    float64 `json:"pret"`
+	Pret    float32 `json:"pret"`
 	Nume    string  `json:"nume"`
 	Tip     int64   `json:"tip"` // 1 - hanorac, 2 - blugi, 3 - pantaloni cargo, 4 - tricou
 	Culoare string  `json:"culoare"`
@@ -49,7 +49,7 @@ func check(err error) {
 	}
 }
 
-// Functie care returneaza hainele ca un un slice de struct haina
+// Functie care returneaza hainele
 func returneazaHaine(c echo.Context) error {
 	//daca cheia este buna, returneaza hainele
 	if keyIsOk(c) {
@@ -62,7 +62,7 @@ func returneazaHaine(c echo.Context) error {
 
 // functie pentru a posta o haina
 func posteazaHaine(c echo.Context) error {
-	if !keyIsOk(c) {
+	if keyIsOk(c) {
 		var hainaNoua haina
 
 		err := c.Bind(&hainaNoua)
@@ -74,6 +74,33 @@ func posteazaHaine(c echo.Context) error {
 	}
 	return echo.ErrBadRequest
 }
+
+// functie care ia hainele din form si le adauga in baza de date
+/*func adaugaHaineDinFormInBazaDeDate(c echo.Context) error {
+	if keyIsOk(c) {
+		pret := c.FormValue("Pret")
+		nume := c.FormValue("Nume")
+		tip := c.FormValue("Tip")
+		culoare := c.FormValue("Culoare")
+		marime := c.FormValue("Marime")
+		sex := c.FormValue("Sex")
+
+		pretFloat, err := strconv.ParseFloat(pret, 32)
+		check(err)
+		tipInt, err := strconv.ParseInt(tip, 10, 64)
+		check(err)
+		fmt.Println(sex)
+
+		sexBool := false
+
+		haina := haina{Pret: float32(pretFloat), Nume: nume, Tip: tipInt, Culoare: culoare, Marime: marime, Sex: sexBool}
+		adaugaInBazaDeDate(haina)
+
+		return c.JSON(http.StatusCreated, haina)
+
+	}
+	return echo.ErrBadRequest
+} */
 
 // functie care returneaza o haina dupa id-ul lui
 func returneazaHainaDupaId(c echo.Context) error {

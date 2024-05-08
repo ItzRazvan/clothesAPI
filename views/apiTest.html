@@ -1,4 +1,4 @@
-
+{{define "apiTest.html"}}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -8,7 +8,23 @@
     <title>apiTest</title>
 </head>
 <body>
-    
+    <div class="haineContainer">
+        {{range .haine}}
+            <div class="card">
+                <p class="Nume">{{.Nume}}</p>
+                <p class="Categorie">{{.Marime}}</p>
+                <p class="Pret">{{.Pret}}</p>
+            </div>
+        {{end}}
+    </div>
+
+    <div class="posteaza">
+        <button class="posteaza" id="posteaza">Posteaza haine</button>
+    </div>
+
+    <div class="inapoi">
+        <button class="Inapoi" id="Inapoi">Inapoi</button>
+    </div>
 </body>
 <style>
     :root {
@@ -25,5 +41,66 @@
     p {
         color: var(--txt)
     }
+
+    button{
+        background-color: #EA4C89;
+        border-radius: 8px;
+        border-style: none;
+        box-sizing: border-box;
+        color: #FFFFFF;
+        position: absolute;
+        height: 4vh;
+        width: 9vw;
+    }
+
+    .posteaza{
+        bottom: 1.25vh;
+        right: 1.25vh;
+    }
+    .posteaza:hover{
+        background-color: #FF6BBD;
+        cursor: pointer;
+    }
+
+    .Inapoi{
+        position: absolute;
+        height: 4vh;
+        width: 9vw;
+        bottom: 1.25vh;
+        left: 1.25vh;
+    }
+    .Inapoi:hover{
+        background-color: #FF6BBD;
+        cursor: pointer;
+    }
+    .haineContainer {
+        display: flex;
+        flex-wrap: wrap;
+        flex-direction: row;
+        gap: 1.25vh;
+    }
+
+    .card{
+        background-color: var(--culoare);
+        border-radius: 8px;
+        padding: 1.25vh;
+        width: 20vw;
+        height: 20vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
 </style>
+
+<script>
+    document.getElementById("posteaza").addEventListener("click", function(){
+        window.location.href = "/apiTest/posteaza";
+    });
+
+    document.getElementById("Inapoi").addEventListener("click", function(){
+        window.location.href = "/";
+    });
+</script>
 </html>
+{{end}}

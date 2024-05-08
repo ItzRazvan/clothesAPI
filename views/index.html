@@ -31,7 +31,7 @@
         </div>
         <div class="testApi">
             <p class="testApiText">Test the API:</p>
-            <button class="testBtn" id="testApi" onclick="test()">Test</button>
+            <button class="testBtn" id="testApi">Test</button>
         </div>
     </div>
     <div id="dummy"></div>
@@ -159,12 +159,19 @@
     }
 
     //testeaza api-ul
-    function test(){
-        window.location.href = "http://localhost:8080/apiTest";
-    }
+   document.getElementById("testApi").addEventListener("click", function () {
+        fetch("/apiTest", {
+            method: "GET",
+            credentials: "include",
+        }).then((response) => {
+            if (response.ok) {
+                window.location.href = response.url;
+            }
+        });
+    }); 
 
     //genereaza o noua cheie
-    document.getElementById("genKey").addEventListener("click", function () {
+   document.getElementById("genKey").addEventListener("click", function () {
         fetch("/genKey", {
             method: "GET",
         }).then((response) => {
@@ -179,6 +186,7 @@
     document.getElementById("logoutBtn").addEventListener("click", function () {
         fetch("/logout", {
             method: "GET",
+            credentials: "include",
         }).then((response) => {
             if (response.ok) {
                 window.location.href = response.url;

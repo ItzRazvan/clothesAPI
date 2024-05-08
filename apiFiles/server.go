@@ -1,12 +1,16 @@
 package apiFiles
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"text/template"
 
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 // porneste serverului cu toate functiile sale
@@ -17,6 +21,12 @@ func ServerStart() {
 	t := &Template{
 		templates: template.Must(template.ParseGlob("./views/*.html")),
 	}
+
+	app.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins:     []string{"http://localhost:8080"},
+		AllowCredentials: true,
+	}))
+
 	app.Renderer = t
 	app.GET("/", renderIndex)
 	app.GET("/genKey", getKey)
@@ -29,9 +39,11 @@ func ServerStart() {
 	app.POST("/signin", signinTry)
 
 	app.GET("/apiTest", renderApiTest)
+	app.GET("/apiTest/posteaza", renderApiTestPost)
 
 	//Functiile din api.go
 	app.GET("/api/haine", returneazaHaine)
+	app.POST("/api/posteaza", posteaza)
 	app.POST("/api/POST", posteazaHaine)
 	app.GET("/api/haine:id", returneazaHainaDupaId)
 
@@ -96,7 +108,7 @@ func getKey(c echo.Context) error {
 // Functie pentru apasarea butonului de logout
 func logout(c echo.Context) error {
 	//stergem cookie ul
-	removeCookie(c)
+	sessionDelete(c)
 
 	//redirectam catre pagina de login
 	return c.Redirect(http.StatusSeeOther, "/login")
@@ -106,15 +118,31 @@ func logout(c echo.Context) error {
 func renderApiTest(c echo.Context) error {
 	//vom trimite toate hainele in pagina
 
-	//incepem prin a face un rqeuest catre api pentru a lua toate hainele
-	cheie := getCheieFromDB(c)
-	if cheie == "" {
+	if !isLoggedIn(c) {
 		c.Redirect(302, "/login")
 		return nil
 	}
+
+	//incepem prin a face un rqeuest catre api pentru a lua toate hainele
+	cheie := getCheieFromDB(c)
+	if cheie == "" {
+		http.Redirect(c.Response(), c.Request(), "/login", http.StatusSeeOther)
+		return nil
+	}
 	linkPtReq := "http://localhost:8080/api/haine?key=" + cheie
-	resp, err := http.Get(string(linkPtReq))
+
+	req, err := http.NewRequest("GET", linkPtReq, nil)
 	check(err)
+
+	cookie, err := c.Request().Cookie("session")
+	check(err)
+
+	req.AddCookie(cookie)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	check(err)
+
 	body, err := io.ReadAll(resp.Body)
 	check(err)
 	resp.Body.Close()
@@ -124,8 +152,95 @@ func renderApiTest(c echo.Context) error {
 	err = json.Unmarshal(body, &haine)
 	check(err)
 
-	// Now you can use 'haine' in your template
+	// Acum putem sa folosim hainele
 	return c.Render(http.StatusOK, "apiTest.html", map[string]interface{}{
 		"haine": haine,
 	})
+}
+
+// Functie care randeaza pagina de testare a postarii in api
+func renderApiTestPost(c echo.Context) error {
+	if !isLoggedIn(c) {
+		c.Redirect(302, "/login")
+		return nil
+	}
+
+	//randam pagina
+	return c.Render(http.StatusOK, "apiTestPost.html", nil)
+
+}
+
+// Functie care da requestul de post catre api (cu cheie)
+func posteaza(c echo.Context) error {
+	if !isLoggedIn(c) {
+		c.Redirect(302, "/login")
+		return nil
+	}
+
+	cheie := getCheieFromDB(c)
+	if cheie == "" {
+		http.Redirect(c.Response(), c.Request(), "/login", http.StatusSeeOther)
+		return nil
+	}
+
+	//preluam toate datele din formular
+	nume := c.FormValue("Nume")
+	tip := c.FormValue("Tip")
+	culoare := c.FormValue("Culoare")
+	marime := c.FormValue("Marime")
+	sex := c.FormValue("Sex")
+	pret := c.FormValue("Pret")
+
+	//convertim tipul de date
+	pretFloat, err := strconv.ParseFloat(pret, 32)
+	check(err)
+	tipInt, err := strconv.ParseInt(tip, 10, 64)
+	check(err)
+
+	var sexBool bool
+	//verificam sexul
+	if sex == "male" {
+		sexBool = true
+	} else if sex == "female" {
+		sexBool = false
+	}
+
+	//creem haina
+	haina := haina{
+		Pret:    float32(pretFloat),
+		Nume:    nume,
+		Tip:     tipInt,
+		Culoare: culoare,
+		Marime:  marime,
+		Sex:     sexBool,
+	}
+
+	//facem requestul catre api
+	linkPtReq := "http://localhost:8080/api/POST?key=" + cheie
+
+	js, err := json.Marshal(haina)
+	check(err)
+
+	req, err := http.NewRequest("POST", linkPtReq, bytes.NewBuffer(js))
+	check(err)
+
+	cookie, err := c.Request().Cookie("session")
+	check(err)
+
+	req.AddCookie(cookie)
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	check(err)
+
+	//verificam daca a fost postat cu succes
+	if resp.StatusCode == 201 {
+		//daca da, trimitem un mesaj
+		fmt.Println("Haina a fost postata cu succes")
+	}
+
+	//redirectam catre pagina de testare a api ului
+	http.Redirect(c.Response(), c.Request(), "/apiTest", http.StatusSeeOther)
+	return nil
 }

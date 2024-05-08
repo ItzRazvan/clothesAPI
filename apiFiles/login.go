@@ -30,10 +30,12 @@ func loginTry(c echo.Context) error {
 		return c.String(400, "Emailul sau parola sunt gresite")
 	}
 
-	//daca totul e corect, crean un cookie pentru a tine minte ca userul este logat
-	createCookie(c, id)
+	//daca totul e corect, cream o sesiune pentru a tine minte ca userul este logat
+	err = sessionInit(c, id)
+	if err != nil {
+		return c.String(400, "Eroare la crearea sesiunii")
+	}
 
 	//Redirectam userul catre pagina principala
 	return c.Redirect(302, "/")
 }
-

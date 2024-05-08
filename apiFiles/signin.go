@@ -60,7 +60,11 @@ func signinTry(c echo.Context) error {
 	check(err)
 
 	//daca totul este ok, cream un cookie pentru a tine minte ca userul este logat
-	createCookie(c, id)
+	err = sessionInit(c, id)
+
+	if err != nil {
+		return c.String(400, "Eroare la crearea sesiunii")
+	}
 
 	//generam o noua cheie pentru user
 	schimbareCheie(c, id)
