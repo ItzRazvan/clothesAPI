@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 	"text/template"
 
 	"github.com/labstack/echo/v4"
@@ -46,6 +47,7 @@ func ServerStart() {
 	app.POST("/api/posteaza", posteaza)
 	app.POST("/api/POST", posteazaHaine)
 	app.GET("/api/haine:id", returneazaHainaDupaId)
+	app.GET("/apiTest/haine:id", returneazaHainaDupaIdTest)
 
 	app.Logger.Fatal(app.Start(":8080"))
 }
@@ -243,4 +245,60 @@ func posteaza(c echo.Context) error {
 	//redirectam catre pagina de testare a api ului
 	http.Redirect(c.Response(), c.Request(), "/apiTest", http.StatusSeeOther)
 	return nil
+}
+
+// Functie care returneaza haina dupa id
+func returneazaHainaDupaIdTest(c echo.Context) error {
+	if !isLoggedIn(c) {
+		c.Redirect(302, "/login")
+		return nil
+	}
+
+	//preluam id ul din url
+	id := c.Param("id")
+
+	id = strings.Replace(id, ":", "", 1)
+
+	//facem requestul catre api
+	cheie := getCheieFromDB(c)
+	if cheie == "" {
+		http.Redirect(c.Response(), c.Request(), "/login", http.StatusSeeOther)
+		return nil
+	}
+
+	linkPtReq := "http://localhost:8080/api/haine:" + id + "?key=" + cheie
+
+	req, err := http.NewRequest("GET", linkPtReq, nil)
+	check(err)
+
+	cookie, err := c.Request().Cookie("session")
+	check(err)
+
+	req.AddCookie(cookie)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	check(err)
+
+	body, err := io.ReadAll(resp.Body)
+	check(err)
+	resp.Body.Close()
+
+	// Unmarshal the JSON response
+	var haina haina
+	err = json.Unmarshal(body, &haina)
+	check(err)
+
+	nume := haina.Nume
+	culoare := haina.Culoare
+	marime := haina.Marime
+	pret := haina.Pret
+
+	// Acum putem sa folosim haina
+	return c.Render(http.StatusOK, "haina.html", map[string]interface{}{
+		"Nume":    nume,
+		"Culoare": culoare,
+		"Marime":  marime,
+		"Pret":    pret,
+	})
 }

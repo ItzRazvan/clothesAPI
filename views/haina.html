@@ -1,0 +1,80 @@
+{{define "haina.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Haina</title>
+</head>
+<body>
+    <div class="haina">
+        <p class="Nume">{{.Nume}}</p>
+        <p class="Marime">{{.Marime}}</p>
+        <p class="Culoare">{{.Culoare}}</p>
+        <p class="Pret">{{.Pret}}</p>
+    </div>    
+    <button class="Inapoi">Inapoi</button>
+</body>
+<style>
+    :root {
+        --bg: #4F4557;
+        --gri: #393646;
+        --culoare: #6D5D6E;
+        --txt: #F4EEE0;
+    }
+
+    body {
+        background-color: var(--gri);
+    }
+
+    p {
+        color: var(--txt)
+    }
+
+    button{
+        background-color: #EA4C89;
+        border-radius: 8px;
+        border-style: none;
+        box-sizing: border-box;
+        color: #FFFFFF;
+        position: absolute;
+        height: 4vh;
+        width: 9vw;
+    }
+
+    
+    .Inapoi{
+        position: absolute;
+        height: 4vh;
+        width: 9vw;
+        bottom: 1.25vh;
+        left: 1.25vh;
+    }
+    .Inapoi:hover{
+        background-color: #FF6BBD;
+        cursor: pointer;
+    }
+
+
+
+    .haina {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 1.25vh;
+        height: 65vh;
+    }
+
+    .haina p {
+        font-size: 1.5rem;
+    }
+</style>
+<script>
+    document.querySelector('.Inapoi').addEventListener('click', () => {
+        window.location.href = '/apiTest';
+    });
+</script>
+</html>
+
+{{end}}

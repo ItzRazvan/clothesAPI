@@ -51,6 +51,7 @@
         position: absolute;
         height: 4vh;
         width: 9vw;
+        transition: 0.35 ease-in-out;
     }
 
     .posteaza{
@@ -77,7 +78,6 @@
         display: flex;
         flex-wrap: wrap;
         flex-direction: row;
-        gap: 1.25vh;
     }
 
     .card{
@@ -90,6 +90,15 @@
         flex-direction: column;
         justify-content: center;
         align-items: center;
+        transition: 0.35s ease-in-out;
+        margin: 1.25vw;
+    }
+    .card:hover{
+        background-color: #6D5D6E;
+        cursor: pointer;
+        transform: scale(1.05);
+
+
     }
 </style>
 
@@ -101,6 +110,13 @@
     document.getElementById("Inapoi").addEventListener("click", function(){
         window.location.href = "/";
     });
+
+    let cards = document.getElementsByClassName("card");
+    for(let i = 1; i <= cards.length; i++){
+        cards[i-1].addEventListener("click", function(){
+            window.location.href = "/apiTest/haine:" + i;
+        });
+    }
 </script>
 </html>
 {{end}}
