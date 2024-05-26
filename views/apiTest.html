@@ -8,14 +8,97 @@
     <title>apiTest</title>
 </head>
 <body>
+    <div class="filter">
+        <button class="filterBtn" id="filterBtn">
+            Filtreaza Hainele
+        </button>
+    </div>
+
     <div class="haineContainer">
         {{range .haine}}
-            <div class="card">
-                <p class="Nume">{{.Nume}}</p>
-                <p class="Categorie">{{.Marime}}</p>
-                <p class="Pret">{{.Pret}}</p>
+            <div class="card" data-id="{{.Id}}">
+                <p>{{.Nume}}</p>
+                <p>{{.Marime}}</p>
+                <p>{{.Pret}}</p>
             </div>
         {{end}}
+    </div>
+
+    <div class="filterOptions" id="filterOptions">
+        <p class="FilerOptionsText">Filtreaza dupa:</p>
+
+        <form id="getForm" method="post">
+        <div class="marimeTot">
+            <label>Marime:</label>
+            <select name="Marime" class="form" id="">
+                <option value="">Alege marimea</option>
+                <option value="XS">XS</option>
+                <option value="S">S</option>
+                <option value="M">M</option>
+                <option value="L">L</option>
+                <option value="XL">XL</option>
+                <option value="XXL">XXL</option>
+            </select>
+        </div>
+        <div class="sexTot">
+            <label>Sex:</label>
+            <div class="sexCont">
+                <div class="B">
+                    <label>Barbat</label>
+                    <input type="radio" name="Sex" class="form "value="male">
+                </div>
+                <div class="F">
+                    <label>Femeie</label>
+                    <input type="radio" name="Sex" class="form" value="female">
+                </div> 
+            </div>
+        </div>
+        <div class="culoareTot">
+            <label>Culoare:</label>
+            <select name="Culoare" id="" class="form">
+                <option value="">Alege culoarea</option>
+                <option value="Alb">Alb</option>
+                <option value="Negru">Negru</option>
+                <option value="Gri">Gri</option>
+                <option value="Rosu">Rosu</option>
+                <option value="Galben">Galben</option>
+                <option value="Verde">Verde</option>
+                <option value="Albastru">Albastru</option>
+                <option value="Portocaliu">Portocaliu</option>
+                <option value="Roz">Roz</option>
+                <option value="Mov">Mov</option>
+                <option value="Maro">Maro</option>
+                <option value="Bej">Bej</option>
+                <option value="Bleumarin">Bleumarin</option>
+            </select>
+        </div>
+        <div class="pretTot">
+            <p class="pret">Pret: </p>
+            <div class="selectPret">
+                <label class="maiMare">Mai mare decat:</label>
+                <input type="number" class="pretMare" name="pretMare">
+                <label class="maiMic">Mai mic decat:</label>
+                <input type="number" class="pretMic" name="pretMic">
+            </div>  
+        </div>
+        <div class="tipTot">
+            <label>Tip</label>
+            <select name="Tip" id="" class="form">
+                <option value="">Alege tipul de haina</option>
+                <option value="1">Jachete</option>
+                <option value="2">Pantaloni</option>
+                <option value="3">Tricouri</option>
+                <option value="4">Bluze</option>
+                <option value="5">Fuste</option>
+                <option value="6">Rochii</option>
+                <option value="7">Paltoane</option>
+                <option value="8">Sacouri</option>
+                <option value="9">Camasi</option>
+            </select>
+        </div>
+        </form>
+
+        <button class="filterBtn2" id="filterBtn2">Filtreaza</button>
     </div>
 
     <div class="posteaza">
@@ -48,13 +131,13 @@
         border-style: none;
         box-sizing: border-box;
         color: #FFFFFF;
-        position: absolute;
         height: 4vh;
         width: 9vw;
         transition: 0.35 ease-in-out;
     }
 
     .posteaza{
+        position: fixed;
         bottom: 1.25vh;
         right: 1.25vh;
     }
@@ -64,7 +147,7 @@
     }
 
     .Inapoi{
-        position: absolute;
+        position: fixed;
         height: 4vh;
         width: 9vw;
         bottom: 1.25vh;
@@ -74,7 +157,29 @@
         background-color: #FF6BBD;
         cursor: pointer;
     }
+
+   .filter{
+        display: flex;
+        justify-content: right;
+        margin-top: 1.75vh;
+        margin-right: 1.25vh;
+    }
+    .filterBtn{
+        background-color: #EA4C89;
+        border-radius: 8px;
+        border-style: none;
+        box-sizing: border-box;
+        color: #FFFFFF;
+        height: 4vh;
+        width: 9vw;
+    }
+    .filterBtn:hover{
+        background-color: #FF6BBD;
+        cursor: pointer;
+    }
+
     .haineContainer {
+        margin-top: 5.25vh;
         display: flex;
         flex-wrap: wrap;
         flex-direction: row;
@@ -98,11 +203,130 @@
         cursor: pointer;
         transform: scale(1.05);
 
+    }
 
+    #filterOptions{
+        display: none;
+        padding: 1.25vh;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 20vw;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        gap: 1.5vh;
+        background-color: var(--bg);
+        opacity: 0.9;
+        z-index: 1;
+        transition: 0.35s ease-in-out;
+        padding-left: 8vw;
+        padding-right: 8vw;
+    }
+    .filterBtn2{
+        background-color: #EA4C89;
+        border-radius: 8px;
+        border-style: none;
+        box-sizing: border-box;
+        color: #FFFFFF;
+        height: 4vh;
+        width: 9vw;
+    
+    }
+
+    .filterBtn2:hover{
+        background-color: #FF6BBD;
+        cursor: pointer;
+    }
+
+    .sexCont{
+        display: flex;
+        flex-direction: row;
+        gap: 1.25vh;
+    
+    }
+
+    .sexTot{
+        display: flex;
+        flex-direction: row;
+        margin-bottom: 4.25vh;
+    
+    }
+
+    .form{
+        width: 12.5vw;
+        display: flex;
+        height: 3vh;
+        border-radius: 8px;
+        border-style: none;
+        box-sizing: border-box;
+        
+    }
+
+    label{
+        color: var(--txt);
+    }
+
+    .B{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 1vh;
+    
+    }
+    .F{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 1vh;
+    
+    
+    }
+    .pretTot{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 1.25vh;
+        margin-bottom: 4.25vh;
+    
+    }
+    .selectPret{
+        display: flex;
+        flex-direction: column;
+        gap: 1.25vh;
+    
+    }
+
+    .tipTot{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 1.25vh;
+        margin-bottom: 4.25vh;
+    }
+
+    .marimeTot{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 1.25vh;
+        margin-bottom: 4.25vh;
+    }
+
+    .culoareTot{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 1.25vh;
+        margin-bottom: 4.25vh;
     }
 </style>
 
 <script>
+
     document.getElementById("posteaza").addEventListener("click", function(){
         window.location.href = "/apiTest/posteaza";
     });
@@ -112,11 +336,47 @@
     });
 
     let cards = document.getElementsByClassName("card");
-    for(let i = 1; i <= cards.length; i++){
-        cards[i-1].addEventListener("click", function(){
-            window.location.href = "/apiTest/haine:" + i;
+    for(let card of cards){
+        card.addEventListener("click", function(){
+            window.location.href = "/apiTest/haina:" + card.getAttribute("data-id");
         });
     }
+
+    let fliterClick = false;
+
+document.getElementById("filterBtn").addEventListener("click", function(event){
+    event.stopPropagation(); // Stop the event from bubbling up to the document
+
+    if(!fliterClick){
+        document.getElementById("filterOptions").style.display = "flex";
+        //change text inside button
+        document.getElementById("filterBtn").innerText = "Ascunde";
+        fliterClick = true;
+    }else{
+        document.getElementById("filterOptions").style.display = "none";
+        //change text inside button
+        document.getElementById("filterBtn").innerText = "Filtreaza Hainele";
+        fliterClick = false;
+    }
+});
+
+document.addEventListener("click", function(event){
+    let filterOptions = document.getElementById("filterOptions");
+    let filterBtn = document.getElementById("filterBtn");
+
+    // Check if the clicked element is the filterOptions element, the filterBtn element, or a descendant of the filterOptions element
+    if (!filterOptions.contains(event.target) && event.target !== filterBtn && fliterClick) {
+        // The clicked element is outside the filterOptions and filterBtn elements, hide the filterOptions element
+        filterOptions.style.display = "none";
+        //change text inside button
+        filterBtn.innerText = "Filtreaza Hainele";
+        fliterClick = false;
+    }
+});
+
+document.getElementById("filterBtn2").addEventListener("click", function(){ 
+        window.location.href = "/apiTest/filtrat?" + new URLSearchParams(new FormData(document.getElementById("getForm"))).toString();
+    });
 </script>
 </html>
 {{end}}

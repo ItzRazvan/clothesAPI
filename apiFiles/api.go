@@ -14,6 +14,7 @@ import (
 // Un API folosit pentru a adauga haine intr-un shop online sau fizic
 // Pentru a face requesturi la api, vei folosi apiKey ul generat pe site ul nostru:
 // (vei face req la adresa http://site/api/haine?key=...)
+// Pentru a sterge o haina req la adresa http://site/api/delete:id?key=...
 // Pentru a posta o haina, vei face un request POST la adresa http://site/api/POST?key=...
 // Pentru a vedea o haina dupa id, vei face un request GET la adresa http://site/api/haina/:id?key=...
 // Vei avea nevoie de un struct haina, deoarece api ul va returna hainele in forma de struct din baza de date
@@ -75,6 +76,30 @@ func posteazaHaine(c echo.Context) error {
 	return echo.ErrBadRequest
 }
 
+// functie care sterge o haina dupa id
+func stergeHainaDupaId(c echo.Context) error {
+	if keyIsOk(c) {
+		id := c.Param("id")
+		//delete the : from id
+		id = strings.Replace(id, ":", "", 1)
+		idInt, err := strconv.ParseInt(id, 10, 64)
+		check(err)
+		db := connectToSQL()
+		defer db.Close()
+
+		//Selectam al idInt-n id
+		var idDB int
+		err = db.QueryRow("SELECT id FROM haine order by id limit ?,1", idInt-1).Scan(&idDB)
+		check(err)
+		_, err = db.Exec("DELETE FROM haine WHERE id = ?", idDB)
+
+		check(err)
+
+		return c.String(http.StatusOK, fmt.Sprintf("Haina cu id ul %d a fost stearsa", idInt))
+	}
+	return echo.ErrBadRequest
+}
+
 // functie care ia hainele din form si le adauga in baza de date
 /*func adaugaHaineDinFormInBazaDeDate(c echo.Context) error {
 	if keyIsOk(c) {
@@ -110,22 +135,20 @@ func returneazaHainaDupaId(c echo.Context) error {
 		id = strings.Replace(id, ":", "", 1)
 		idInt, err := strconv.ParseInt(id, 10, 64)
 		check(err)
+
+		//selectam din baza de date haine cu id ul idInt
 		db := connectToSQL()
 		defer db.Close()
 
-		var haina haina
-		//luam haina careia id este idInt
-		rows := db.QueryRow("SELECT haina FROM haine WHERE id = ?", idInt)
 		var hainaJson string
-		err = rows.Scan(&hainaJson)
-		if err == nil {
-			err = json.Unmarshal([]byte(hainaJson), &haina)
-			if err == nil {
-				return c.JSON(http.StatusOK, haina)
-			}
-			return c.String(http.StatusNotFound, fmt.Sprintf("Haina cu id ul %d nu a fost gasita", idInt))
-		}
-		return c.String(http.StatusNotFound, fmt.Sprintf("Haina cu id ul %d nu a fost gasita", idInt))
+		err = db.QueryRow("SELECT haina FROM haine where id = ?", idInt).Scan(&hainaJson)
+		check(err)
+
+		var h haina
+		err = json.Unmarshal([]byte(hainaJson), &h)
+		check(err)
+
+		return c.JSON(http.StatusOK, h)
 
 	}
 	return echo.ErrBadRequest
@@ -167,6 +190,79 @@ func iaHaineDinBazaDeDate() []haina {
 }
 
 */
+
+// Functie care filtreaza hainele
+func filtreaza(c echo.Context) error {
+	if keyIsOk(c) {
+		tip := c.QueryParam("tip")
+		culoare := c.QueryParam("culoare")
+		marime := c.QueryParam("marime")
+		sex := c.QueryParam("sex")
+
+		sexBool := false
+		if sex == "male" {
+			sexBool = true
+		}
+
+		pretMare := c.QueryParam("pretMare")
+		pretMic := c.QueryParam("pretMic")
+
+		haine := iaHaineDinBazaDeDate()
+
+		var haineFiltrate []haina
+
+		for _, h := range haine {
+			//excludem criterile care sunt ""
+
+			if tip != "" {
+				tipInt, err := strconv.ParseInt(tip, 10, 64)
+				check(err)
+				if h.Tip != tipInt {
+					continue
+				}
+			}
+
+			if culoare != "" {
+				if h.Culoare != culoare {
+					continue
+				}
+			}
+
+			if marime != "" {
+				if h.Marime != marime {
+					continue
+				}
+			}
+
+			if sex != "" {
+				if h.Sex != sexBool {
+					continue
+				}
+			}
+
+			if pretMare != "" {
+				pretMareFloat, err := strconv.ParseFloat(pretMare, 32)
+				check(err)
+				if float32(pretMareFloat) > h.Pret {
+					continue
+				}
+			}
+
+			if pretMic != "" {
+				pretMicFloat, err := strconv.ParseFloat(pretMic, 32)
+				check(err)
+				if float32(pretMicFloat) < h.Pret {
+					continue
+				}
+			}
+
+			haineFiltrate = append(haineFiltrate, h)
+		}
+		return c.JSON(http.StatusOK, haineFiltrate)
+	}
+
+	return nil
+}
 
 // Verificam daca cheia din url este buna
 func keyIsOk(c echo.Context) bool {

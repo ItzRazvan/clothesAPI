@@ -12,13 +12,50 @@
             <label>Nume</label><input type="text" name="Nume" class="form">
         </div>
         <div class="f">
-            <label>Tip</label><input type="Number" name="Tip" class="form">
+            <label>Tip</label>
+            <select name="Tip" class="form">
+                <option value="">Alege tipul de haina</option>
+                <option value="1">Jachete</option>
+                <option value="2">Pantaloni</option>
+                <option value="3">Tricouri</option>
+                <option value="4">Bluze</option>
+                <option value="5">Fuste</option>
+                <option value="6">Rochii</option>
+                <option value="7">Paltoane</option>
+                <option value="8">Sacouri</option>
+                <option value="9">Camasi</option>
+            </select>
         </div>
         <div class="f">
-            <label>Marime</label><input type="text" name="Marime" class="form">
+            <label>Marime</label>
+            <select name="Marime" class="form">
+                <option value="">Alege marimea</option>
+                <option value="XS">XS</option>
+                <option value="S">S</option>
+                <option value="M">M</option>
+                <option value="L">L</option>
+                <option value="XL">XL</option>
+                <option value="XXL">XXL</option>
+            </select>
         </div>
         <div class="f">
-            <label>Culoare</label><input type="text" name="Culoare" class="form">
+            <label>Culoare</label>
+            <select name="Culoare" id="" class="form">
+                <option value="">Alege culoarea</option>
+                <option value="Alb">Alb</option>
+                <option value="Negru">Negru</option>
+                <option value="Gri">Gri</option>
+                <option value="Rosu">Rosu</option>
+                <option value="Galben">Galben</option>
+                <option value="Verde">Verde</option>
+                <option value="Albastru">Albastru</option>
+                <option value="Portocaliu">Portocaliu</option>
+                <option value="Roz">Roz</option>
+                <option value="Mov">Mov</option>
+                <option value="Maro">Maro</option>
+                <option value="Bej">Bej</option>
+                <option value="Bleumarin">Bleumarin</option>
+            </select>
         </div>
         <div class="fsex">
             <div class="b">
@@ -57,6 +94,7 @@
     }
 
     button{
+
         background-color: #EA4C89;
         border-radius: 8px;
         border-style: none;
@@ -81,7 +119,7 @@
     }
 
     .Inapoi{
-        position: absolute;
+        position: fixed;
         bottom: 1.25vh;
         left: 1.25vh;
     }
@@ -90,6 +128,7 @@
         cursor: pointer;
     }
     .postForm{
+        position: fixed;
         display: flex;
         flex-direction: column;
         gap: 1.25vh;

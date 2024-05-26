@@ -14,6 +14,16 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
+type hainaCuId struct {
+	Id      int     `json:"id"`
+	Nume    string  `json:"nume"`
+	Culoare string  `json:"culoare"`
+	Marime  string  `json:"marime"`
+	Pret    float32 `json:"pret"`
+	Sex     bool    `json:"sex"`
+	Tip     int64   `json:"tip"`
+}
+
 // porneste serverului cu toate functiile sale
 func ServerStart() {
 	app := echo.New()
@@ -47,7 +57,12 @@ func ServerStart() {
 	app.POST("/api/posteaza", posteaza)
 	app.POST("/api/POST", posteazaHaine)
 	app.GET("/api/haine:id", returneazaHainaDupaId)
-	app.GET("/apiTest/haine:id", returneazaHainaDupaIdTest)
+	app.GET("/apiTest/haina:id", returneazaHainaDupaIdTest)
+	app.GET("/apiTest/filtrat", filter)
+	app.POST("/api/filtreaza", filtreaza)
+
+	app.DELETE("/apiTest/haine:id", stergeHaina)
+	app.DELETE("/api/delete:id", stergeHainaDupaId)
 
 	app.Logger.Fatal(app.Start(":8080"))
 }
@@ -154,9 +169,38 @@ func renderApiTest(c echo.Context) error {
 	err = json.Unmarshal(body, &haine)
 	check(err)
 
+	var iduri []int
+	//preluam id urile din baza de date in ordine crescatoare
+	db := connectToSQL()
+	defer db.Close()
+
+	rows, err := db.Query("SELECT id FROM haine")
+	check(err)
+
+	for rows.Next() {
+		var id int
+		err = rows.Scan(&id)
+		check(err)
+		iduri = append(iduri, id)
+	}
+
+	var haineId []hainaCuId
+
+	for i := 0; i < len(haine); i++ {
+		haineId = append(haineId, hainaCuId{
+			Id:      iduri[i],
+			Nume:    haine[i].Nume,
+			Pret:    haine[i].Pret,
+			Sex:     haine[i].Sex,
+			Tip:     haine[i].Tip,
+			Culoare: haine[i].Culoare,
+			Marime:  haine[i].Marime,
+		})
+	}
+
 	// Acum putem sa folosim hainele
 	return c.Render(http.StatusOK, "apiTest.html", map[string]interface{}{
-		"haine": haine,
+		"haine": haineId,
 	})
 }
 
@@ -192,6 +236,11 @@ func posteaza(c echo.Context) error {
 	marime := c.FormValue("Marime")
 	sex := c.FormValue("Sex")
 	pret := c.FormValue("Pret")
+
+	//veridicam daca sunt completate fieldurile
+	if nume == "" || tip == "" || culoare == "" || marime == "" || sex == "" || pret == "" {
+		return c.Redirect(http.StatusSeeOther, "/apiTest")
+	}
 
 	//convertim tipul de date
 	pretFloat, err := strconv.ParseFloat(pret, 32)
@@ -300,5 +349,168 @@ func returneazaHainaDupaIdTest(c echo.Context) error {
 		"Culoare": culoare,
 		"Marime":  marime,
 		"Pret":    pret,
+	})
+}
+
+// Functie care sterge haina
+func stergeHaina(c echo.Context) error {
+	if !isLoggedIn(c) {
+		c.Redirect(302, "/login")
+		return nil
+	}
+
+	//preluam id ul din url(int ul de dupa :)
+	id := c.Param("id")
+
+	id = strings.Replace(id, ":", "", 1)
+
+	//facem requestul catre api
+	cheie := getCheieFromDB(c)
+	if cheie == "" {
+		http.Redirect(c.Response(), c.Request(), "/login", http.StatusSeeOther)
+		return nil
+	}
+
+	linkPtReq := "http://localhost:8080/api/delete:" + id + "?key=" + cheie
+
+	req, err := http.NewRequest("DELETE", linkPtReq, nil)
+	check(err)
+
+	cookie, err := c.Request().Cookie("session")
+	check(err)
+
+	req.AddCookie(cookie)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	check(err)
+
+	//verificam daca a fost stearsa cu succes
+	if resp.StatusCode == 200 {
+		//daca da, trimitem un mesaj
+		fmt.Println("Haina a fost stearsa cu succes")
+	}
+
+	//redirectam catre pagina de testare a api ului
+	http.Redirect(c.Response(), c.Request(), "/apiTest", http.StatusSeeOther)
+	return nil
+}
+
+// Functie care filtreaza hainele
+func filter(c echo.Context) error {
+	if !isLoggedIn(c) {
+		c.Redirect(302, "/login")
+		return nil
+	}
+
+	//preluam datele din url
+	marime := c.QueryParam("Marime")
+	culoare := c.QueryParam("Culoare")
+	tip := c.QueryParam("Tip")
+	sex := c.QueryParam("Sex")
+	pretMare := c.QueryParam("pretMare")
+	pretMic := c.QueryParam("pretMic")
+
+	//vom face un request catre api cu parametrii
+	cheie := getCheieFromDB(c)
+	if cheie == "" {
+		http.Redirect(c.Response(), c.Request(), "/login", http.StatusSeeOther)
+		return nil
+	}
+
+	linkPtReq := "http://localhost:8080/api/filtreaza?key=" + cheie
+
+	//punem cookie un in request
+	req, err := http.NewRequest("POST", linkPtReq, nil)
+	check(err)
+
+	cookie, err := c.Request().Cookie("session")
+	check(err)
+
+	req.AddCookie(cookie)
+
+	//veridicam ca toate sa nu fie goale
+
+	if marime == "" && culoare == "" && tip == "" && sex == "" && pretMare == "" && pretMic == "" {
+		http.Redirect(c.Response(), c.Request(), "/apiTest", http.StatusSeeOther)
+		return nil
+	}
+
+	//punem parametrii in request
+	q := req.URL.Query()
+	if marime != "" {
+		q.Add("marime", marime)
+	}
+	if culoare != "" {
+		q.Add("culoare", culoare)
+	}
+	if sex != "" {
+		q.Add("sex", sex)
+	}
+
+	if pretMare != "" {
+		q.Add("pretMare", pretMare)
+	}
+
+	if pretMic != "" {
+		q.Add("pretMic", pretMic)
+	}
+
+	if tip != "" {
+		q.Add("tip", tip)
+	}
+
+	req.URL.RawQuery = q.Encode()
+
+	client := &http.Client{}
+
+	resp, err := client.Do(req)
+
+	check(err)
+
+	body, err := io.ReadAll(resp.Body)
+	check(err)
+
+	resp.Body.Close()
+
+	// Unmarshal the JSON response
+	var haineFiltrate []haina
+	err = json.Unmarshal(body, &haineFiltrate)
+	check(err)
+
+	//preluam id urile din baza de date DOAR ale hainelor filtrate, in oridinea filtrarii
+
+	var haineId []hainaCuId
+
+	for i := 0; i < len(haineFiltrate); i++ {
+		db := connectToSQL()
+		defer db.Close()
+
+		//preluam numele si marimea
+		nume := haineFiltrate[i].Nume
+		marime := haineFiltrate[i].Marime
+		culoare := haineFiltrate[i].Culoare
+		tip := haineFiltrate[i].Tip
+
+		var id int
+		err = db.QueryRow("select id from haine where haina ->> '$.nume' = ? AND haina ->> '$.marime' = ? AND haina ->> '$.culoare' = ? AND haina ->> '$.tip' = ?", nume, marime, culoare, tip).Scan(&id)
+		if err != nil {
+			return c.String(400, "Eroare la preluarea id ului")
+		}
+
+		haineId = append(haineId, hainaCuId{
+			Id:      id,
+			Nume:    haineFiltrate[i].Nume,
+			Pret:    haineFiltrate[i].Pret,
+			Tip:     haineFiltrate[i].Tip,
+			Sex:     haineFiltrate[i].Sex,
+			Marime:  haineFiltrate[i].Marime,
+			Culoare: haineFiltrate[i].Culoare,
+		})
+	}
+
+	// Acum putem sa folosim hainele
+	return c.Render(http.StatusOK, "apiTest.html", map[string]interface{}{
+		"haine": haineId,
 	})
 }
