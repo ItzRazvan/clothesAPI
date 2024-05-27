@@ -18,7 +18,10 @@ func getSessionKey() []byte {
 	if err != nil {
 		key = genereazaStringRandom(32)
 		_, err = db.Exec("INSERT INTO sessionKey (cheie) VALUES (?)", key)
-		check(err)
+		if err != nil {
+			fmt.Println("Eroare la inserarea cheii in baza de date")
+			return nil
+		}
 	}
 
 	return []byte(key)
@@ -75,7 +78,9 @@ func sessionInit(c echo.Context, id int) error {
 
 func sessionDelete(c echo.Context) {
 	session, err := store.Get(c.Request(), "session")
-	check(err)
+	if err != nil {
+		return
+	}
 	session.Values["authenticated"] = false
 	session.Save(c.Request(), c.Response())
 
@@ -83,7 +88,11 @@ func sessionDelete(c echo.Context) {
 
 func getIdFromSession(c echo.Context) int {
 	session, err := store.Get(c.Request(), "session")
-	check(err)
+	if err != nil {
+		fmt.Println("Eroare la preluarea sesiunii")
+		c.Redirect(http.StatusSeeOther, "/login")
+		return 0
+	}
 
 	var id int
 	if session.IsNew {
@@ -94,11 +103,16 @@ func getIdFromSession(c echo.Context) int {
 		cookie, err := c.Cookie("session")
 		if err != nil {
 			fmt.Println("Cookieul nu exista")
+			c.Redirect(http.StatusSeeOther, "/login")
 			return 0
 		}
 
 		id, err = strconv.Atoi(cookie.Value)
-		check(err)
+		if err != nil {
+			fmt.Println("Eroare la convertirea id ului din cookie")
+			c.Redirect(http.StatusSeeOther, "/login")
+			return 0
+		}
 
 		return id
 	}

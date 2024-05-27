@@ -48,7 +48,7 @@ func generateToken(text string) string {
 	hash, err := bcrypt.GenerateFromPassword([]byte(text), bcrypt.DefaultCost)
 
 	if err != nil {
-		log.Fatal(err)
+		return text
 	}
 
 	return string(hash)
@@ -91,7 +91,9 @@ func schimbareCheie(c echo.Context, id int) {
 	}
 
 	_, err := db.Exec("UPDATE users SET cheie = ? WHERE id = ?", cheie, id)
-	check(err)
+	if err != nil {
+		fmt.Fprintf(c.Response(), "Eroare la schimbarea cheii")
+	}
 }
 
 // fucntie care ia cheia din baza de date
@@ -107,7 +109,10 @@ func getCheieFromDB(c echo.Context) string {
 
 	var cheie string
 	err := db.QueryRow("SELECT cheie FROM users WHERE id = ?", id).Scan(&cheie)
-	check(err)
+	if err != nil {
+		fmt.Fprintf(c.Response(), "Eroare la preluarea cheii")
+		return ""
+	}
 
 	return cheie
 }
@@ -115,8 +120,9 @@ func getCheieFromDB(c echo.Context) string {
 // Functie care te conecteaza la baza de date
 func connectToSQL() *sql.DB {
 	db, err := sql.Open("mysql", "root:razvan2007@tcp(127.0.0.1:3306)/clothesAPI")
-	check(err)
+	if err != nil {
+		log.Fatal("Eroare la conectarea la baza de date")
+	}
 	db.Ping()
-	check(err)
 	return db
 }

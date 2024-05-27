@@ -48,22 +48,25 @@ func signinTry(c echo.Context) error {
 
 	//daca emailul nu exista, il adaugam in baza de date
 	_, err = db.Exec("INSERT INTO users (email, parola) VALUES (?, ?)", email, parolaHash)
-	check(err)
+	if err != nil {
+		return c.String(400, "Eroare la adaugarea emailului in baza de date")
 
+	}
 	//cream un index nou pentru email
-	_, err = db.Exec("CREATE UNIQUE INDEX email ON users (email)")
-	check(err)
+	_, _ = db.Exec("CREATE UNIQUE INDEX email ON users (email)")
 
 	//luam id ul userului
 	var id int
 	err = db.QueryRow("SELECT id FROM users WHERE email = ?", email).Scan(&id)
-	check(err)
+	if err != nil {
+		return c.String(400, "Eroare la crearea contului. Incercati din nou mai tarziu")
+	}
 
 	//daca totul este ok, cream un cookie pentru a tine minte ca userul este logat
 	err = sessionInit(c, id)
 
 	if err != nil {
-		return c.String(400, "Eroare la crearea sesiunii")
+		return c.String(400, "Eroare la crearea contului. Incercati din nou mai tarziu")
 	}
 
 	//generam o noua cheie pentru user

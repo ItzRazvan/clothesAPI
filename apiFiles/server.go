@@ -116,7 +116,9 @@ func getKey(c echo.Context) error {
 	schimbareCheie(c, 0)
 	cheie := getCheieFromDB(c)
 	js, err := json.Marshal(cheie)
-	check(err)
+	if err != nil {
+		return err
+	}
 	c.Response().Writer.Header().Set("Content-Type", "application/json")
 	c.Response().Writer.Write(js)
 	return nil
@@ -149,16 +151,23 @@ func renderApiTest(c echo.Context) error {
 	linkPtReq := "http://localhost:8080/api/haine?key=" + cheie
 
 	req, err := http.NewRequest("GET", linkPtReq, nil)
-	check(err)
+	if err != nil {
+		return err
+	}
 
 	cookie, err := c.Request().Cookie("session")
-	check(err)
+	if err != nil {
+		fmt.Println("Eroare la preluarea cookie ului")
+		return c.Redirect(http.StatusSeeOther, "/login")
+	}
 
 	req.AddCookie(cookie)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
-	check(err)
+	if err != nil {
+		fmt.Fprintf(c.Response().Writer, "Eroare la request")
+	}
 
 	body, err := io.ReadAll(resp.Body)
 	check(err)
@@ -167,7 +176,9 @@ func renderApiTest(c echo.Context) error {
 	// Unmarshal the JSON response
 	var haine []haina
 	err = json.Unmarshal(body, &haine)
-	check(err)
+	if err != nil {
+		fmt.Fprintf(c.Response().Writer, "Eroare cu datele")
+	}
 
 	var iduri []int
 	//preluam id urile din baza de date in ordine crescatoare
@@ -175,12 +186,13 @@ func renderApiTest(c echo.Context) error {
 	defer db.Close()
 
 	rows, err := db.Query("SELECT id FROM haine")
-	check(err)
+	if err != nil {
+		fmt.Println("Eroare la preluarea id urilor")
+	}
 
 	for rows.Next() {
 		var id int
-		err = rows.Scan(&id)
-		check(err)
+		_ = rows.Scan(&id)
 		iduri = append(iduri, id)
 	}
 
@@ -270,20 +282,29 @@ func posteaza(c echo.Context) error {
 	linkPtReq := "http://localhost:8080/api/POST?key=" + cheie
 
 	js, err := json.Marshal(haina)
-	check(err)
+	if err != nil {
+		fmt.Fprintf(c.Response().Writer, "Eroare cu datele")
+	}
 
 	req, err := http.NewRequest("POST", linkPtReq, bytes.NewBuffer(js))
-	check(err)
+
+	if err != nil {
+		fmt.Fprintf(c.Response().Writer, "Eroare la postare")
+	}
 
 	cookie, err := c.Request().Cookie("session")
-	check(err)
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/login")
+	}
 
 	req.AddCookie(cookie)
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
-	check(err)
+	if err != nil {
+		fmt.Fprintf(c.Response().Writer, "Haina nu a putut fi postata")
+	}
 
 	//verificam daca a fost postat cu succes
 	if resp.StatusCode == 201 {
@@ -318,25 +339,35 @@ func returneazaHainaDupaIdTest(c echo.Context) error {
 	linkPtReq := "http://localhost:8080/api/haine:" + id + "?key=" + cheie
 
 	req, err := http.NewRequest("GET", linkPtReq, nil)
-	check(err)
+	if err != nil {
+		fmt.Println("Eroare la request")
+	}
 
 	cookie, err := c.Request().Cookie("session")
-	check(err)
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/login")
+	}
 
 	req.AddCookie(cookie)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
-	check(err)
+	if err != nil {
+		fmt.Fprintf(c.Response().Writer, "Eroare la request")
+	}
 
 	body, err := io.ReadAll(resp.Body)
-	check(err)
+	if err != nil {
+		fmt.Fprintf(c.Response().Writer, "Eroare la citirea raspunsului")
+	}
 	resp.Body.Close()
 
 	// Unmarshal the JSON response
 	var haina haina
 	err = json.Unmarshal(body, &haina)
-	check(err)
+	if err != nil {
+		fmt.Fprintf(c.Response().Writer, "Eroare cu datele")
+	}
 
 	nume := haina.Nume
 	culoare := haina.Culoare
@@ -374,16 +405,23 @@ func stergeHaina(c echo.Context) error {
 	linkPtReq := "http://localhost:8080/api/delete:" + id + "?key=" + cheie
 
 	req, err := http.NewRequest("DELETE", linkPtReq, nil)
-	check(err)
+
+	if err != nil {
+		fmt.Println("Haina nu poate fi stearsa")
+	}
 
 	cookie, err := c.Request().Cookie("session")
-	check(err)
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/login")
+	}
 
 	req.AddCookie(cookie)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
-	check(err)
+	if err != nil {
+		fmt.Fprintf(c.Response().Writer, "Haina nu a putut fi stearsa")
+	}
 
 	//verificam daca a fost stearsa cu succes
 	if resp.StatusCode == 200 {
@@ -422,10 +460,14 @@ func filter(c echo.Context) error {
 
 	//punem cookie un in request
 	req, err := http.NewRequest("POST", linkPtReq, nil)
-	check(err)
+	if err != nil {
+		fmt.Fprintf(c.Response().Writer, "Eroare la request")
+	}
 
 	cookie, err := c.Request().Cookie("session")
-	check(err)
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/login")
+	}
 
 	req.AddCookie(cookie)
 
@@ -465,18 +507,23 @@ func filter(c echo.Context) error {
 	client := &http.Client{}
 
 	resp, err := client.Do(req)
-
-	check(err)
+	if err != nil {
+		fmt.Fprintf(c.Response().Writer, "Eroare la request")
+	}
 
 	body, err := io.ReadAll(resp.Body)
-	check(err)
+	if err != nil {
+		fmt.Fprintf(c.Response().Writer, "Eroare la citirea raspunsului")
+	}
 
 	resp.Body.Close()
 
 	// Unmarshal the JSON response
 	var haineFiltrate []haina
 	err = json.Unmarshal(body, &haineFiltrate)
-	check(err)
+	if err != nil {
+		fmt.Fprintf(c.Response().Writer, "Eroare cu datele")
+	}
 
 	//preluam id urile din baza de date DOAR ale hainelor filtrate, in oridinea filtrarii
 

@@ -37,10 +37,23 @@ func adaugaInBazaDeDate(hainaDeAdaugat haina) {
 	defer db.Close()
 
 	j, err := json.Marshal(hainaDeAdaugat)
-	check(err)
+	if err != nil {
+		fmt.Println("Eraore la adaugar hainei in baza de date")
+		return
+	}
+
+	_, _ = db.Exec("DROP INDEX indexHaine ON haine")
 
 	_, err = db.Exec("INSERT INTO haine (haina) VALUES (?)", j)
-	check(err)
+	if err != nil {
+		fmt.Println("Eroare la adaugare hainei in baza de date")
+		return
+	}
+
+	_, err = db.Exec("CREATE UNIQUE INDEX indexHaine ON haine (id, haina)")
+	if err != nil {
+		fmt.Println("Eroare la crearea indexului")
+	}
 }
 
 // Functie care verifica sa nu fie vreo eroare
@@ -67,7 +80,9 @@ func posteazaHaine(c echo.Context) error {
 		var hainaNoua haina
 
 		err := c.Bind(&hainaNoua)
-		check(err)
+		if err != nil {
+			return echo.ErrBadRequest
+		}
 
 		adaugaInBazaDeDate(hainaNoua)
 
@@ -83,17 +98,24 @@ func stergeHainaDupaId(c echo.Context) error {
 		//delete the : from id
 		id = strings.Replace(id, ":", "", 1)
 		idInt, err := strconv.ParseInt(id, 10, 64)
-		check(err)
+		if err != nil {
+			return echo.ErrBadRequest
+		}
 		db := connectToSQL()
 		defer db.Close()
 
 		//Selectam al idInt-n id
 		var idDB int
 		err = db.QueryRow("SELECT id FROM haine order by id limit ?,1", idInt-1).Scan(&idDB)
-		check(err)
+		if err != nil {
+			return echo.ErrBadRequest
+		}
 		_, err = db.Exec("DELETE FROM haine WHERE id = ?", idDB)
 
-		check(err)
+		if err == nil {
+			fmt.Println("Eroare la stergerea hainei din baza de date")
+			return echo.ErrBadRequest
+		}
 
 		return c.String(http.StatusOK, fmt.Sprintf("Haina cu id ul %d a fost stearsa", idInt))
 	}
@@ -134,7 +156,9 @@ func returneazaHainaDupaId(c echo.Context) error {
 		//delete the : from id
 		id = strings.Replace(id, ":", "", 1)
 		idInt, err := strconv.ParseInt(id, 10, 64)
-		check(err)
+		if err != nil {
+			return echo.ErrBadRequest
+		}
 
 		//selectam din baza de date haine cu id ul idInt
 		db := connectToSQL()
@@ -142,11 +166,16 @@ func returneazaHainaDupaId(c echo.Context) error {
 
 		var hainaJson string
 		err = db.QueryRow("SELECT haina FROM haine where id = ?", idInt).Scan(&hainaJson)
-		check(err)
 
+		if err != nil {
+			return echo.ErrBadRequest
+		}
 		var h haina
 		err = json.Unmarshal([]byte(hainaJson), &h)
-		check(err)
+
+		if err != nil {
+			return echo.ErrBadRequest
+		}
 
 		return c.JSON(http.StatusOK, h)
 
@@ -162,15 +191,22 @@ func iaHaineDinBazaDeDate() []haina {
 	defer db.Close()
 
 	rows, err := db.Query("SELECT haina FROM haine")
-	check(err)
+	if err != nil {
+		fmt.Println("Eroare la preluarea hainelor din baza de date")
+		return nil
+	}
 
 	for rows.Next() {
 		var h haina
 		var hainaJson string
 		err = rows.Scan(&hainaJson)
-		check(err)
+		if err != nil {
+			continue
+		}
 		err = json.Unmarshal([]byte(hainaJson), &h)
-		check(err)
+		if err != nil {
+			continue
+		}
 		haine = append(haine, h)
 	}
 	return haine
@@ -216,7 +252,9 @@ func filtreaza(c echo.Context) error {
 
 			if tip != "" {
 				tipInt, err := strconv.ParseInt(tip, 10, 64)
-				check(err)
+				if err != nil {
+					continue
+				}
 				if h.Tip != tipInt {
 					continue
 				}
@@ -242,7 +280,9 @@ func filtreaza(c echo.Context) error {
 
 			if pretMare != "" {
 				pretMareFloat, err := strconv.ParseFloat(pretMare, 32)
-				check(err)
+				if err != nil {
+					continue
+				}
 				if float32(pretMareFloat) > h.Pret {
 					continue
 				}
@@ -250,7 +290,9 @@ func filtreaza(c echo.Context) error {
 
 			if pretMic != "" {
 				pretMicFloat, err := strconv.ParseFloat(pretMic, 32)
-				check(err)
+				if err != nil {
+					continue
+				}
 				if float32(pretMicFloat) < h.Pret {
 					continue
 				}
