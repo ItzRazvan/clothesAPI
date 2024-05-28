@@ -100,7 +100,7 @@
         border-style: none;
         box-sizing: border-box;
         color: #FFFFFF;
-        position: absolute;
+        position: fixed;
         height: 4vh;
         width: 9vw;
     }
@@ -177,6 +177,35 @@
         box-sizing: border-box;
         padding-left: 1.25vh;
     }
+
+    @media screen and (max-width: 1200px){
+        .form{
+            width: 30vw;
+        }
+    }
+
+    @media screen and (max-width: 800px){
+        .form{
+            width: 40vw;
+        }
+
+        button {
+            font-size: 0.9rem;
+            width: 12vw;
+        
+    }
+
+    @media screen and (max-width: 500px){
+        .form{
+            width: 47vw;
+        }
+
+        button {
+            font-size: 0.8rem;
+            width: 15vw;
+        }
+    }
+}
 </style>
 <script>
     //transforma datele in json si trimite requestul

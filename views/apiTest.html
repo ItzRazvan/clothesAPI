@@ -5,14 +5,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <title>apiTest</title>
 </head>
 <body>
+    <div class="top">
+        <div class="search">
+            <input type="text" class="searchBar" placeholder="Cauta..." id="searchBar">
+            <button type="submit" class="btnSearch"><i class="fa fa-search" id="searchBtn"></i></button>
+        </div>
     <div class="filter">
         <button class="filterBtn" id="filterBtn">
-            Filtreaza Hainele
+            Filtreaza
         </button>
     </div>
+    </div>  
 
     <div class="haineContainer">
         {{range .haine}}
@@ -24,85 +31,86 @@
         {{end}}
     </div>
 
-    <div class="filterOptions" id="filterOptions">
-        <p class="FilerOptionsText">Filtreaza dupa:</p>
+    
+        <div class="filterOptions" id="filterOptions">
+            <p class="FilerOptionsText">Filtreaza dupa:</p>
 
-        <form id="getForm" method="post">
-        <div class="marimeTot">
-            <label>Marime:</label>
-            <select name="Marime" class="form" id="">
-                <option value="">Alege marimea</option>
-                <option value="XS">XS</option>
-                <option value="S">S</option>
-                <option value="M">M</option>
-                <option value="L">L</option>
-                <option value="XL">XL</option>
-                <option value="XXL">XXL</option>
-            </select>
-        </div>
-        <div class="sexTot">
-            <label>Sex:</label>
-            <div class="sexCont">
-                <div class="B">
-                    <label>Barbat</label>
-                    <input type="radio" name="Sex" class="form "value="male">
-                </div>
-                <div class="F">
-                    <label>Femeie</label>
-                    <input type="radio" name="Sex" class="form" value="female">
-                </div> 
+            <form id="getForm" method="post">
+            <div class="marimeTot">
+                <label>Marime:</label>
+                <select name="Marime" class="form" id="">
+                    <option value="">Alege marimea</option>
+                    <option value="XS">XS</option>
+                    <option value="S">S</option>
+                    <option value="M">M</option>
+                    <option value="L">L</option>
+                    <option value="XL">XL</option>
+                    <option value="XXL">XXL</option>
+                </select>
             </div>
-        </div>
-        <div class="culoareTot">
-            <label>Culoare:</label>
-            <select name="Culoare" id="" class="form">
-                <option value="">Alege culoarea</option>
-                <option value="Alb">Alb</option>
-                <option value="Negru">Negru</option>
-                <option value="Gri">Gri</option>
-                <option value="Rosu">Rosu</option>
-                <option value="Galben">Galben</option>
-                <option value="Verde">Verde</option>
-                <option value="Albastru">Albastru</option>
-                <option value="Portocaliu">Portocaliu</option>
-                <option value="Roz">Roz</option>
-                <option value="Mov">Mov</option>
-                <option value="Maro">Maro</option>
-                <option value="Bej">Bej</option>
-                <option value="Bleumarin">Bleumarin</option>
-            </select>
-        </div>
-        <div class="pretTot">
-            <p class="pret">Pret: </p>
-            <div class="selectPret">
-                <label class="maiMare">Mai mare decat:</label>
-                <input type="number" class="pretMare" name="pretMare">
-                <label class="maiMic">Mai mic decat:</label>
-                <input type="number" class="pretMic" name="pretMic">
-            </div>  
-        </div>
-        <div class="tipTot">
-            <label>Tip</label>
-            <select name="Tip" id="" class="form">
-                <option value="">Alege tipul de haina</option>
-                <option value="1">Jachete</option>
-                <option value="2">Pantaloni</option>
-                <option value="3">Tricouri</option>
-                <option value="4">Bluze</option>
-                <option value="5">Fuste</option>
-                <option value="6">Rochii</option>
-                <option value="7">Paltoane</option>
-                <option value="8">Sacouri</option>
-                <option value="9">Camasi</option>
-            </select>
-        </div>
-        </form>
+            <div class="sexTot">
+                <label>Sex:</label>
+                <div class="sexCont">
+                    <div class="B">
+                        <label>Barbat</label>
+                        <input type="radio" name="Sex" class="form "value="male">
+                    </div>
+                    <div class="F">
+                        <label>Femeie</label>
+                        <input type="radio" name="Sex" class="form" value="female">
+                    </div> 
+                </div>
+            </div>
+            <div class="culoareTot">
+                <label>Culoare:</label>
+                <select name="Culoare" id="" class="form">
+                    <option value="">Alege culoarea</option>
+                    <option value="Alb">Alb</option>
+                    <option value="Negru">Negru</option>
+                    <option value="Gri">Gri</option>
+                    <option value="Rosu">Rosu</option>
+                    <option value="Galben">Galben</option>
+                    <option value="Verde">Verde</option>
+                    <option value="Albastru">Albastru</option>
+                    <option value="Portocaliu">Portocaliu</option>
+                    <option value="Roz">Roz</option>
+                    <option value="Mov">Mov</option>
+                    <option value="Maro">Maro</option>
+                    <option value="Bej">Bej</option>
+                    <option value="Bleumarin">Bleumarin</option>
+                </select>
+            </div>
+            <div class="pretTot">
+                <p class="pret">Pret: </p>
+                <div class="selectPret">
+                    <label class="maiMare">Mai mare decat:</label>
+                    <input type="number" class="pretMare" name="pretMare">
+                    <label class="maiMic">Mai mic decat:</label>
+                    <input type="number" class="pretMic" name="pretMic">
+                </div>  
+            </div>
+            <div class="tipTot">
+                <label>Tip</label>
+                <select name="Tip" id="" class="form">
+                    <option value="">Alege tipul de haina</option>
+                    <option value="1">Jachete</option>
+                    <option value="2">Pantaloni</option>
+                    <option value="3">Tricouri</option>
+                    <option value="4">Bluze</option>
+                    <option value="5">Fuste</option>
+                    <option value="6">Rochii</option>
+                    <option value="7">Paltoane</option>
+                    <option value="8">Sacouri</option>
+                    <option value="9">Camasi</option>
+                </select>
+            </div>
+            </form>
 
-        <button class="filterBtn2" id="filterBtn2">Filtreaza</button>
-    </div>
+            <button class="filterBtn2" id="filterBtn2">Filtreaza</button>
+        </div>
 
     <div class="posteaza">
-        <button class="posteaza" id="posteaza">Posteaza haine</button>
+        <button class="posteaza" id="posteaza">Posteaza</button>
     </div>
 
     <div class="inapoi">
@@ -125,7 +133,11 @@
         color: var(--txt)
     }
 
-    button{
+    .posteaza{
+        position: fixed;
+        bottom: 1.25vh;
+        right: 1.25vh;
+        
         background-color: #EA4C89;
         border-radius: 8px;
         border-style: none;
@@ -134,12 +146,6 @@
         height: 4vh;
         width: 9vw;
         transition: 0.35 ease-in-out;
-    }
-
-    .posteaza{
-        position: fixed;
-        bottom: 1.25vh;
-        right: 1.25vh;
     }
     .posteaza:hover{
         background-color: #FF6BBD;
@@ -152,6 +158,16 @@
         width: 9vw;
         bottom: 1.25vh;
         left: 1.25vh;
+
+        
+        background-color: #EA4C89;
+        border-radius: 8px;
+        border-style: none;
+        box-sizing: border-box;
+        color: #FFFFFF;
+        height: 4vh;
+        width: 9vw;
+        transition: 0.35 ease-in-out;
     }
     .Inapoi:hover{
         background-color: #FF6BBD;
@@ -165,6 +181,7 @@
         margin-right: 1.25vh;
     }
     .filterBtn{
+
         background-color: #EA4C89;
         border-radius: 8px;
         border-style: none;
@@ -172,6 +189,18 @@
         color: #FFFFFF;
         height: 4vh;
         width: 9vw;
+        transition: 0.35 ease-in-out;
+
+
+        background-color: #EA4C89;
+        border-radius: 8px;
+        border-style: none;
+        box-sizing: border-box;
+        color: #FFFFFF;
+        height: 4vh;
+        width: 9vw;
+
+        
     }
     .filterBtn:hover{
         background-color: #FF6BBD;
@@ -323,6 +352,157 @@
         gap: 1.25vh;
         margin-bottom: 4.25vh;
     }
+
+    .top{
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1.25vh;
+        margin-right: 1.25vh;
+    }
+
+    .searchBar{
+        width: 20vw;
+        height: 4vh;
+        border-style: none;
+        box-sizing: border-box;
+        padding: 1.25vh;
+        margin-left: 0.75vw;
+    }
+    .btnSearch{
+        margin-top: -0.05vh;
+        padding: 0.75vh;
+    }
+
+    .search{
+        display: flex;
+        flex-direction: row;
+        gap: -1vw;
+    
+    }
+
+    @media screen and (max-width: 1200px){
+        .posteaza{
+            font-size: 0.8rem;
+            width: 10vw;
+        }
+        .Inapoi{
+            font-size: 0.8rem;
+            width: 10vw;
+        }
+        .filterBtn{
+            width: 10vw;
+            font-size:  0.8rem;
+        }
+    }
+
+
+
+    @media screen and (max-width: 950px){
+        .haineContainer{
+            margin-top: 10vh;
+            display: flex;
+            flex-wrap: wrap;
+            flex-direction: row;
+            justify-content: center;
+            gap: 1vw;
+        }
+
+        .card{
+            width: 30vw;
+            height: 30vh;
+        }
+
+        .searchBar{
+            width: 30vw;
+        }
+        .filterBtn{
+            width: 15vw;
+        }
+
+        #filterOptions{
+            width: 30vw;
+            padding-left: 19vw;
+            padding-right: 19vw;
+        }
+
+        .form{
+            width: 20vw;
+        }
+
+        .posteaza{
+            width: 15vw;
+        }
+
+        .Inapoi{
+            width: 15vw;
+        }
+        
+    }
+
+    @media screen and (max-width: 600px){
+        .haineContainer{
+            margin-top: 10vh;
+            display: flex;
+            flex-wrap: wrap;
+            flex-direction: row;
+            justify-content: center;
+            gap: 1vw;
+
+        }
+        .card{
+            width: 30vw;
+            height: 30vh;
+        }
+        .searchBar{
+            width: 30vw;
+        }
+        .filterBtn{
+            width: 15vw;
+        }
+        .form{
+            width: 20vw;
+        }
+        .posteaza{
+            width: 15vw;
+        }
+        .Inapoi{
+            width: 15vw;
+        }
+        .filterBtn2{
+            width: 15vw;
+        }
+        #filterOptions{
+            width: 30vw;
+            padding-left: 15vw;
+            padding-right: 15vw;
+        }
+
+        .form{
+            width: 20vw;
+        }
+
+        .posteaza{
+            width: 17vw;
+        }
+
+        .Inapoi{
+            width: 17vw;
+        }
+
+        .filterBtn2{
+            width: 17vw;
+        }
+
+        .searchBar{
+            width: 40vw;
+        }
+
+        .filterBtn{
+            width: 17vw;
+        }
+    }
 </style>
 
 <script>
@@ -377,6 +557,13 @@ document.addEventListener("click", function(event){
 document.getElementById("filterBtn2").addEventListener("click", function(){ 
         window.location.href = "/apiTest/filtrat?" + new URLSearchParams(new FormData(document.getElementById("getForm"))).toString();
     });
+
+//Luam ce a fost introdus in search bar
+document.getElementById("searchBtn").addEventListener("click", function(){
+    //facem un get request catre /apiTest/search?search=ceva
+    window.location.href = "/apiTest/search?" + new URLSearchParams({search: document.getElementById("searchBar").value}).toString();
+});
+
 </script>
 </html>
 {{end}}

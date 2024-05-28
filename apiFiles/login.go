@@ -22,6 +22,7 @@ func loginTry(c echo.Context) error {
 
 	if err != nil {
 		return c.String(400, "Emailul sau parola sunt gresite")
+
 	}
 
 	//verificam daca parola este corecta

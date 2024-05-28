@@ -18,7 +18,7 @@ func signinTry(c echo.Context) error {
 	const minEntropy float64 = 70
 	err := passwordValidator.Validate(parola, minEntropy)
 	if err != nil {
-		return c.String(400, "Parola prea slaba")
+		return c.String(400, "Emailul sau parola sunt invalide")
 	}
 
 	parolaHash := generateToken(parola)
@@ -26,10 +26,10 @@ func signinTry(c echo.Context) error {
 	//verificam daca emailul este valid
 	ret, err := verifier.Verify(email)
 	if err != nil {
-		return c.String(400, "Email invalid")
+		return c.String(400, "Emailul sau parola sunt invilaide")
 	}
 	if !ret.Syntax.Valid {
-		return c.String(400, "Sintaxa invalida")
+		return c.String(400, "Emailul sau parola sunt invalide")
 	}
 
 	//verificam daca emailul exista deja in baza de date

@@ -64,6 +64,8 @@ func ServerStart() {
 	app.DELETE("/apiTest/haine:id", stergeHaina)
 	app.DELETE("/api/delete:id", stergeHainaDupaId)
 
+	app.GET("/apiTest/search", search)
+
 	app.Logger.Fatal(app.Start(":8080"))
 }
 
@@ -560,4 +562,81 @@ func filter(c echo.Context) error {
 	return c.Render(http.StatusOK, "apiTest.html", map[string]interface{}{
 		"haine": haineId,
 	})
+}
+
+func search(c echo.Context) error {
+	if !isLoggedIn(c) {
+		c.Redirect(302, "/login")
+		return nil
+	}
+
+	//preluam datele din url
+	search := c.QueryParam("search")
+
+	//cautam in baza da date orice cuvant care contine search'
+	db := connectToSQL()
+	defer db.Close()
+
+	rows, err := db.Query("SELECT haina FROM haine")
+	if err != nil {
+		fmt.Fprintf(c.Response().Writer, "Eroare la preluarea hainelor")
+	}
+
+	var haine []haina
+
+	for rows.Next() {
+		var h haina
+		var hainaJson string
+		err = rows.Scan(&hainaJson)
+		if err != nil {
+			fmt.Fprintf(c.Response().Writer, "Eroare la preluarea hainelor")
+		}
+
+		err = json.Unmarshal([]byte(hainaJson), &h)
+		if err != nil {
+			fmt.Fprintf(c.Response().Writer, "Eroare la preluarea hainelor")
+		}
+
+		if strings.Contains(strings.ToLower(h.Nume), strings.ToLower(search)) || strings.Contains(strings.ToLower(h.Culoare), strings.ToLower(search)) || strings.Contains(strings.ToLower(h.Marime), strings.ToLower(search)) {
+			haine = append(haine, h)
+		}
+	}
+
+	//preluam id urile din baza de date DOAR ale hainelor filtrate, in oridinea filtrarii
+
+	var haineId []hainaCuId
+
+	for i := 0; i < len(haine); i++ {
+		db := connectToSQL()
+		defer db.Close()
+
+		//preluam numele si marimea
+		nume := haine[i].Nume
+		marime := haine[i].Marime
+		culoare := haine[i].Culoare
+		tip := haine[i].Tip
+
+		var id int
+		err = db.QueryRow("select id from haine where haina ->> '$.nume' = ? AND haina ->> '$.marime' = ? AND haina ->> '$.culoare' = ? AND haina ->> '$.tip' = ?", nume, marime, culoare, tip).Scan(&id)
+		if err != nil {
+			return c.String(400, "Eroare la preluarea id ului")
+		}
+
+		haineId = append(haineId, hainaCuId{
+			Id:      id,
+			Nume:    haine[i].Nume,
+			Pret:    haine[i].Pret,
+			Tip:     haine[i].Tip,
+			Sex:     haine[i].Sex,
+			Marime:  haine[i].Marime,
+			Culoare: haine[i].Culoare,
+		})
+
+	}
+
+	// Acum putem sa folosim hainele
+	return c.Render(http.StatusOK, "apiTest.html", map[string]interface{}{
+		"haine": haineId,
+	})
+
 }

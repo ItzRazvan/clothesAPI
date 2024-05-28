@@ -1,3 +1,4 @@
+{{define "signin.html"}}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -21,7 +22,14 @@
             <button id="submitBtn">Submit</button>
             <button onclick="login()">LogIn</button>
         </div>
+
     </div>
+
+    
+    <div class="Eroare">
+        <p id="eroare" style="color: red;"></p>
+    </div>
+
     <div id="dummy"></div>
 </body>
 
@@ -113,7 +121,7 @@
         font-family: "Haas Grot Text R Web", "Helvetica Neue", Helvetica, Arial, sans-serif;
         font-size: 1rem;
         height: 4.15vh;
-        width: 20vw;
+        width: 25vw;
         list-style: none;
         margin-bottom: 0.7rem;
     }
@@ -128,6 +136,46 @@
         display: none;
     }
 
+    .Eroare{
+        display: flex;
+        justify-content: center;
+        margin-top: -15vh;
+    }
+
+    @media screen and (max-width: 800px){
+        label{
+            font-size: 1.25rem;
+        }
+        .form{
+            width: 35vw;
+
+        }
+        .butoane{
+            gap: 1.25vh;
+        }
+        button {
+            width: 8vw;
+            font-size: 0.65rem;
+        }
+
+        
+    }
+
+    @media screen and (max-width: 500px){
+        label{
+            font-size: 1rem;
+        }
+        .form{
+            width: 45vw;
+
+        }
+        .butoane{
+            gap: 1.25vh;
+        }
+        button {
+            width: 12vw;
+        }
+    }
 </style>
 
 <script>
@@ -143,9 +191,13 @@
         }).then((response) => {
             if(response.status == 200){
                 window.location.href = response.url;
+            }else{
+                document.getElementById("eroare").innerText = "Email gresit sau parola prea slaba";
             }
         });
     }); 
 </script>
 
 </html>
+
+{{end}}
