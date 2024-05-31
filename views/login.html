@@ -183,6 +183,7 @@
         window.location.href = "http://localhost:8080/signin";
     }
 
+    //request pt a trimite datele de login
     document.getElementById("submitBtn").addEventListener("click", () =>{
         fetch("/login", {
             method: "POST",

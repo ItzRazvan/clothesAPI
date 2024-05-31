@@ -13,10 +13,12 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// Structura care contine template-urile
 type Template struct {
 	templates *template.Template
 }
 
+// Functie care da rander la html cu template
 func (t *Template) Render(w io.Writer, index string, data interface{}, c echo.Context) error {
 	return t.templates.ExecuteTemplate(w, index, data)
 }
@@ -28,6 +30,7 @@ func genereazaStringRandom(size int) string {
 
 	a := make([]byte, size)
 
+	//generam un string random
 	for i := range a {
 		a[i] = caractere[rand.Intn(len(caractere))]
 	}

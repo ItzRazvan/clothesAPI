@@ -33,23 +33,35 @@ func ServerStart() {
 		templates: template.Must(template.ParseGlob("./views/*.html")),
 	}
 
+	//middleware pentru CORS
 	app.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins:     []string{"http://localhost:8080"},
 		AllowCredentials: true,
 	}))
 
 	app.Renderer = t
+
+	//rutele aplicatiei:
+	//Functiile din login.go
 	app.GET("/", renderIndex)
+	//daca este un req facut, se va genera o cheie noua
 	app.GET("/genKey", getKey)
+	//daca este un req facut, se va face logout
 	app.GET("/logout", logout)
 
+	//Functiile din login.go
 	app.GET("/login", renderLogin)
+	//Functiile din signin.go
 	app.GET("/signin", renderSingin)
 
+	//Se incerca logarea
 	app.POST("/login", loginTry)
+	//Se incerca signin ul
 	app.POST("/signin", signinTry)
 
+	//pagina de test a api-ului
 	app.GET("/apiTest", renderApiTest)
+	//pagina de postare in api
 	app.GET("/apiTest/posteaza", renderApiTestPost)
 
 	//Functiile din api.go
@@ -60,12 +72,15 @@ func ServerStart() {
 	app.GET("/apiTest/haina:id", returneazaHainaDupaIdTest)
 	app.GET("/apiTest/filtrat", filter)
 	app.POST("/api/filtreaza", filtreaza)
-
-	app.DELETE("/apiTest/haine:id", stergeHaina)
 	app.DELETE("/api/delete:id", stergeHainaDupaId)
 
+	//functie care gaseste id ul si apeleaza functia de stergere
+	app.DELETE("/apiTest/haine:id", stergeHaina)
+
+	//Functie de cautare a hainelor
 	app.GET("/apiTest/search", search)
 
+	//porneste serverul
 	app.Logger.Fatal(app.Start(":8080"))
 }
 
@@ -75,6 +90,7 @@ func renderIndex(c echo.Context) error {
 	if isLoggedIn(c) {
 		cheie := getCheieFromDB(c)
 
+		//cheie pentru a fi trimisa in pagina
 		key := map[string]interface{}{
 			"Cheie": cheie,
 		}
@@ -106,17 +122,13 @@ func renderSingin(c echo.Context) error {
 	return nil
 }
 
-// Genereaza o cheie noua dupa ce butonul de generare este apasat
-/*func generateKey(c echo.Context) error {
-	schimbareCheie(c, 0)
-	refreshPage(c)
-	return nil
-}*/
-
 // funcite care genereaza cheie noua
 func getKey(c echo.Context) error {
+	//schimbam cheia
 	schimbareCheie(c, 0)
+	//luam cheia
 	cheie := getCheieFromDB(c)
+	//trimitem cheia in pagina
 	js, err := json.Marshal(cheie)
 	if err != nil {
 		return err
@@ -152,11 +164,13 @@ func renderApiTest(c echo.Context) error {
 	}
 	linkPtReq := "http://localhost:8080/api/haine?key=" + cheie
 
+	//facem requestul
 	req, err := http.NewRequest("GET", linkPtReq, nil)
 	if err != nil {
 		return err
 	}
 
+	//punem cookie ul in request pt a verfiica ca userul este logat
 	cookie, err := c.Request().Cookie("session")
 	if err != nil {
 		fmt.Println("Eroare la preluarea cookie ului")
@@ -165,17 +179,19 @@ func renderApiTest(c echo.Context) error {
 
 	req.AddCookie(cookie)
 
+	//facem requestul
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Fprintf(c.Response().Writer, "Eroare la request")
 	}
 
+	//citim raspunsul
 	body, err := io.ReadAll(resp.Body)
 	check(err)
 	resp.Body.Close()
 
-	// Unmarshal the JSON response
+	// Formateaza raspunsul JSON intr-un array de haine
 	var haine []haina
 	err = json.Unmarshal(body, &haine)
 	if err != nil {
@@ -192,6 +208,7 @@ func renderApiTest(c echo.Context) error {
 		fmt.Println("Eroare la preluarea id urilor")
 	}
 
+	//parcurgem id urile si le adaugam in slice ul iduri
 	for rows.Next() {
 		var id int
 		_ = rows.Scan(&id)
@@ -200,6 +217,7 @@ func renderApiTest(c echo.Context) error {
 
 	var haineId []hainaCuId
 
+	//adaugam id urile in structura haineId
 	for i := 0; i < len(haine); i++ {
 		haineId = append(haineId, hainaCuId{
 			Id:      iduri[i],
@@ -280,7 +298,7 @@ func posteaza(c echo.Context) error {
 		Sex:     sexBool,
 	}
 
-	//facem requestul catre api
+	//facem requestul catre api adaungand si cookie ul in request
 	linkPtReq := "http://localhost:8080/api/POST?key=" + cheie
 
 	js, err := json.Marshal(haina)
@@ -340,11 +358,13 @@ func returneazaHainaDupaIdTest(c echo.Context) error {
 
 	linkPtReq := "http://localhost:8080/api/haine:" + id + "?key=" + cheie
 
+	//facem requestul catre api
 	req, err := http.NewRequest("GET", linkPtReq, nil)
 	if err != nil {
 		fmt.Println("Eroare la request")
 	}
 
+	//punem cookie ul in request
 	cookie, err := c.Request().Cookie("session")
 	if err != nil {
 		return c.Redirect(http.StatusSeeOther, "/login")
@@ -352,19 +372,21 @@ func returneazaHainaDupaIdTest(c echo.Context) error {
 
 	req.AddCookie(cookie)
 
+	//facem requestul
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Fprintf(c.Response().Writer, "Eroare la request")
 	}
 
+	//citim raspunsul
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Fprintf(c.Response().Writer, "Eroare la citirea raspunsului")
 	}
 	resp.Body.Close()
 
-	// Unmarshal the JSON response
+	// Formateaza raspunsul JSON intr-un array de haine
 	var haina haina
 	err = json.Unmarshal(body, &haina)
 	if err != nil {
@@ -404,6 +426,7 @@ func stergeHaina(c echo.Context) error {
 		return nil
 	}
 
+	//facem requestul catre api
 	linkPtReq := "http://localhost:8080/api/delete:" + id + "?key=" + cheie
 
 	req, err := http.NewRequest("DELETE", linkPtReq, nil)
@@ -412,11 +435,13 @@ func stergeHaina(c echo.Context) error {
 		fmt.Println("Haina nu poate fi stearsa")
 	}
 
+	//punem cookie ul in request
 	cookie, err := c.Request().Cookie("session")
 	if err != nil {
 		return c.Redirect(http.StatusSeeOther, "/login")
 	}
 
+	//punem cookie ul in request
 	req.AddCookie(cookie)
 
 	client := &http.Client{}
@@ -520,7 +545,7 @@ func filter(c echo.Context) error {
 
 	resp.Body.Close()
 
-	// Unmarshal the JSON response
+	//Formateaza raspunsul JSON intr-un array de haine
 	var haineFiltrate []haina
 	err = json.Unmarshal(body, &haineFiltrate)
 	if err != nil {
@@ -535,18 +560,20 @@ func filter(c echo.Context) error {
 		db := connectToSQL()
 		defer db.Close()
 
-		//preluam numele si marimea
+		//preluam numele si marimea si culoarea si tipul
 		nume := haineFiltrate[i].Nume
 		marime := haineFiltrate[i].Marime
 		culoare := haineFiltrate[i].Culoare
 		tip := haineFiltrate[i].Tip
 
+		//preluam id ul din hainele filtrate
 		var id int
 		err = db.QueryRow("select id from haine where haina ->> '$.nume' = ? AND haina ->> '$.marime' = ? AND haina ->> '$.culoare' = ? AND haina ->> '$.tip' = ?", nume, marime, culoare, tip).Scan(&id)
 		if err != nil {
 			return c.String(400, "Eroare la preluarea id ului")
 		}
 
+		//adaugam id ul in structura haineId
 		haineId = append(haineId, hainaCuId{
 			Id:      id,
 			Nume:    haineFiltrate[i].Nume,
@@ -573,7 +600,7 @@ func search(c echo.Context) error {
 	//preluam datele din url
 	search := c.QueryParam("search")
 
-	//cautam in baza da date orice cuvant care contine search'
+	//luam toate hainele
 	db := connectToSQL()
 	defer db.Close()
 
@@ -584,6 +611,7 @@ func search(c echo.Context) error {
 
 	var haine []haina
 
+	//parcurgem hainele si le adaugam in slice ul haine
 	for rows.Next() {
 		var h haina
 		var hainaJson string
@@ -592,11 +620,13 @@ func search(c echo.Context) error {
 			fmt.Fprintf(c.Response().Writer, "Eroare la preluarea hainelor")
 		}
 
+		//formateaza haina in structura haina
 		err = json.Unmarshal([]byte(hainaJson), &h)
 		if err != nil {
 			fmt.Fprintf(c.Response().Writer, "Eroare la preluarea hainelor")
 		}
 
+		//verificam daca haina contine stringul cautat in orice filed
 		if strings.Contains(strings.ToLower(h.Nume), strings.ToLower(search)) || strings.Contains(strings.ToLower(h.Culoare), strings.ToLower(search)) || strings.Contains(strings.ToLower(h.Marime), strings.ToLower(search)) {
 			haine = append(haine, h)
 		}
@@ -606,6 +636,7 @@ func search(c echo.Context) error {
 
 	var haineId []hainaCuId
 
+	//adaugam id urile in structura haineId
 	for i := 0; i < len(haine); i++ {
 		db := connectToSQL()
 		defer db.Close()

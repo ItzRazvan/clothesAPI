@@ -111,10 +111,12 @@
 
 </style>
 <script>
+    // redirect to the apiTest page
     document.querySelector('.Inapoi').addEventListener('click', () => {
         window.location.href = '/apiTest';
     });
 
+    //face un fetch cu metoda DELETE la url-ul curent
     document.querySelector('.delete').addEventListener('click', () => {
         const curentUrl = window.location.href;
         fetch(curentUrl, {

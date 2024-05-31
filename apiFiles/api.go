@@ -27,36 +27,38 @@ type haina struct {
 	Sex     bool    `json:"sex"`    // 0 - Femei, 1 - Barbati
 }
 
-//Date de inceput
-//var haina1 = haina{Pret: 69.99, Nume: "ZW COLLECTION BOOTCUT MID-RISE CONTOUR JEANS", Tip: 2, Culoare: "Albastru", Marime: "L", Sex: false}
-//var haina2 = haina{Pret: 129.99, Nume: "JEWEL NECKLACE HOODIE", Tip: 1, Culoare: "Rosu", Marime: "S", Sex: true}
-
+// functie cara adauga o haina in baza de date
 func adaugaInBazaDeDate(hainaDeAdaugat haina) {
 	//adauga hainele din var haine in baza de date
 	db := connectToSQL()
 	defer db.Close()
 
+	//formatam haina in JSON
 	j, err := json.Marshal(hainaDeAdaugat)
 	if err != nil {
 		fmt.Println("Eraore la adaugar hainei in baza de date")
 		return
 	}
 
+	//Scoatem indexu daca exista, ca sa il refacem apoi
+	//Nu bagam in seama eraorea pt ca nu conteaza daca nu are index, il vom crea oricum
 	_, _ = db.Exec("DROP INDEX indexHaine ON haine")
 
+	//inseram haina in baza de date
 	_, err = db.Exec("INSERT INTO haine (haina) VALUES (?)", j)
 	if err != nil {
 		fmt.Println("Eroare la adaugare hainei in baza de date")
 		return
 	}
 
+	//creem indexul
 	_, err = db.Exec("CREATE UNIQUE INDEX indexHaine ON haine (id, haina)")
 	if err != nil {
 		fmt.Println("Eroare la crearea indexului")
 	}
 }
 
-// Functie care verifica sa nu fie vreo eroare
+// Functie care verifica sa nu fie vreo eroare si opreste programul daca este cazul
 func check(err error) {
 	if err != nil {
 		log.Fatal(err)
@@ -79,11 +81,13 @@ func posteazaHaine(c echo.Context) error {
 	if keyIsOk(c) {
 		var hainaNoua haina
 
+		//luam haina din request
 		err := c.Bind(&hainaNoua)
 		if err != nil {
 			return echo.ErrBadRequest
 		}
 
+		//le adaugam in baza de date
 		adaugaInBazaDeDate(hainaNoua)
 
 		return c.JSON(http.StatusCreated, hainaNoua)
@@ -94,8 +98,9 @@ func posteazaHaine(c echo.Context) error {
 // functie care sterge o haina dupa id
 func stergeHainaDupaId(c echo.Context) error {
 	if keyIsOk(c) {
+		//luam id ul din parametrii url
 		id := c.Param("id")
-		//delete the : from id
+		//stergem : din id
 		id = strings.Replace(id, ":", "", 1)
 		idInt, err := strconv.ParseInt(id, 10, 64)
 		if err != nil {
@@ -110,6 +115,8 @@ func stergeHainaDupaId(c echo.Context) error {
 		if err != nil {
 			return echo.ErrBadRequest
 		}
+
+		//il stergem din baza de date
 		_, err = db.Exec("DELETE FROM haine WHERE id = ?", idDB)
 
 		if err == nil {
@@ -122,38 +129,12 @@ func stergeHainaDupaId(c echo.Context) error {
 	return echo.ErrBadRequest
 }
 
-// functie care ia hainele din form si le adauga in baza de date
-/*func adaugaHaineDinFormInBazaDeDate(c echo.Context) error {
-	if keyIsOk(c) {
-		pret := c.FormValue("Pret")
-		nume := c.FormValue("Nume")
-		tip := c.FormValue("Tip")
-		culoare := c.FormValue("Culoare")
-		marime := c.FormValue("Marime")
-		sex := c.FormValue("Sex")
-
-		pretFloat, err := strconv.ParseFloat(pret, 32)
-		check(err)
-		tipInt, err := strconv.ParseInt(tip, 10, 64)
-		check(err)
-		fmt.Println(sex)
-
-		sexBool := false
-
-		haina := haina{Pret: float32(pretFloat), Nume: nume, Tip: tipInt, Culoare: culoare, Marime: marime, Sex: sexBool}
-		adaugaInBazaDeDate(haina)
-
-		return c.JSON(http.StatusCreated, haina)
-
-	}
-	return echo.ErrBadRequest
-} */
-
 // functie care returneaza o haina dupa id-ul lui
 func returneazaHainaDupaId(c echo.Context) error {
 	if keyIsOk(c) {
+		//luam id ul din parametrii url
 		id := c.Param("id")
-		//delete the : from id
+		//stergem : din id
 		id = strings.Replace(id, ":", "", 1)
 		idInt, err := strconv.ParseInt(id, 10, 64)
 		if err != nil {
@@ -164,12 +145,15 @@ func returneazaHainaDupaId(c echo.Context) error {
 		db := connectToSQL()
 		defer db.Close()
 
+		//selectam haina
 		var hainaJson string
 		err = db.QueryRow("SELECT haina FROM haine where id = ?", idInt).Scan(&hainaJson)
 
 		if err != nil {
 			return echo.ErrBadRequest
 		}
+
+		//formatam haina in structura haina
 		var h haina
 		err = json.Unmarshal([]byte(hainaJson), &h)
 
@@ -190,12 +174,14 @@ func iaHaineDinBazaDeDate() []haina {
 	db := connectToSQL()
 	defer db.Close()
 
+	//selectam hainele
 	rows, err := db.Query("SELECT haina FROM haine")
 	if err != nil {
 		fmt.Println("Eroare la preluarea hainelor din baza de date")
 		return nil
 	}
 
+	//parcurgem hainele si le adaugam in slice ul haine
 	for rows.Next() {
 		var h haina
 		var hainaJson string
@@ -212,24 +198,10 @@ func iaHaineDinBazaDeDate() []haina {
 	return haine
 }
 
-// Functie care porneste serverul
-//In acest demo nu este folosita pt ca deja exista un server folosit
-//Dar, voi folosi fix aceste functii in serverul folosit deja
-/*func StartApi() {
-	app := echo.New()
-
-	app.GET("/api/haine", returneazaHaine)
-	app.POST("/api/POST", posteazaHaine)
-	app.GET("/api/haine/:id", returneazaHainaDupaId)
-
-	app.Logger.Fatal(app.Start(":8080"))
-}
-
-*/
-
 // Functie care filtreaza hainele
 func filtreaza(c echo.Context) error {
 	if keyIsOk(c) {
+		//luam criteriile de filtrare din url
 		tip := c.QueryParam("tip")
 		culoare := c.QueryParam("culoare")
 		marime := c.QueryParam("marime")
@@ -247,6 +219,7 @@ func filtreaza(c echo.Context) error {
 
 		var haineFiltrate []haina
 
+		//parcurgem hainele si le adaugam in slice ul haineFiltrate daca respecta criteriile
 		for _, h := range haine {
 			//excludem criterile care sunt ""
 
@@ -308,7 +281,10 @@ func filtreaza(c echo.Context) error {
 
 // Verificam daca cheia din url este buna
 func keyIsOk(c echo.Context) bool {
+	//luam cheia din url
 	cheie := c.QueryParam("key")
+	//luam cheia din baza de date
 	cheieDinDB := getCheieFromDB(c)
+	//verificam daca sunt egale
 	return cheie == cheieDinDB
 }

@@ -515,15 +515,18 @@
         window.location.href = "/";
     });
 
+    //Daca dam click pe un card, ne duce la pagina cu haina respectiva
     let cards = document.getElementsByClassName("card");
     for(let card of cards){
         card.addEventListener("click", function(){
+            //facem un get request catre /apiTest/haina:id
             window.location.href = "/apiTest/haina:" + card.getAttribute("data-id");
         });
     }
 
     let fliterClick = false;
 
+    //Afisam filtrele daca dam click pe buton
 document.getElementById("filterBtn").addEventListener("click", function(event){
     event.stopPropagation(); // Stop the event from bubbling up to the document
 
@@ -540,6 +543,7 @@ document.getElementById("filterBtn").addEventListener("click", function(event){
     }
 });
 
+//Ascundem filtrele daca dam click in afara lor
 document.addEventListener("click", function(event){
     let filterOptions = document.getElementById("filterOptions");
     let filterBtn = document.getElementById("filterBtn");
@@ -554,6 +558,7 @@ document.addEventListener("click", function(event){
     }
 });
 
+//Luam ce a fost introdus in filtre
 document.getElementById("filterBtn2").addEventListener("click", function(){ 
         window.location.href = "/apiTest/filtrat?" + new URLSearchParams(new FormData(document.getElementById("getForm"))).toString();
     });
