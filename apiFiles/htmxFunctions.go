@@ -38,9 +38,11 @@ func genereazaStringRandom(size int) string {
 	return string(a)
 }
 
+// Genereaza o cheie random
 func genereazaCheieRandom() string {
-	//generate an random string of size 25
+	//generam un string random
 	randString := genereazaStringRandom(25)
+	//hashuim stringul
 	hashedString := generateToken(randString)
 
 	return hashedString
@@ -57,42 +59,26 @@ func generateToken(text string) string {
 	return string(hash)
 }
 
-// Functia verifica daca cheia este generata, pentru a nu genera inca una, doar in caz ca unserul apasa pe butonul de generare
-/*func existaSauGenereazaCheie() string {
-	db := connectToSQL()
-	defer db.Close()
-
-	//verificam daca exista deja o cheie in baza de date
-	var cheieDinDB string
-	err := db.QueryRow("SELECT value FROM cheie").Scan(&cheieDinDB)
-
-	//daca exista, returnam cheia
-	if err == nil {
-		return cheieDinDB
-	} else {
-		//daca nu exista, generam una noua
-		cheieNoua := genereazaCheieRandom()
-		_, err = db.Exec("INSERT INTO cheie (value) VALUES (?)", cheieNoua)
-		check(err)
-		return cheieNoua
-	}
-} */
-
+// Functie care schimba cheia
 func schimbareCheie(c echo.Context, id int) {
 	db := connectToSQL()
 	defer db.Close()
 
 	cheie := genereazaCheieRandom()
 
+	//daca id ul este 0 atunci luam id ul din sesiune
 	if id == 0 {
 		idBun := getIdFromSession(c)
 		id = idBun
+
+		//daca id ul este 0 inseamna ca nu este nimeni logat
 		if id == 0 {
 			c.Redirect(302, "/login")
 			return
 		}
 	}
 
+	//schimbam cheia in baza de date
 	_, err := db.Exec("UPDATE users SET cheie = ? WHERE id = ?", cheie, id)
 	if err != nil {
 		fmt.Fprintf(c.Response(), "Eroare la schimbarea cheii")
@@ -104,12 +90,14 @@ func getCheieFromDB(c echo.Context) string {
 	db := connectToSQL()
 	defer db.Close()
 
+	//luam id ul din sesiune
 	id := getIdFromSession(c)
 	if id == 0 {
 		fmt.Println("Userul nu este detectat logat")
 		return ""
 	}
 
+	//selectam cheia din baza de date
 	var cheie string
 	err := db.QueryRow("SELECT cheie FROM users WHERE id = ?", id).Scan(&cheie)
 	if err != nil {
@@ -122,7 +110,7 @@ func getCheieFromDB(c echo.Context) string {
 
 // Functie care te conecteaza la baza de date
 func connectToSQL() *sql.DB {
-	db, err := sql.Open("mysql", "root:razvan2007@tcp(127.0.0.1:3306)/clothesAPI")
+	db, err := sql.Open("mysql", "root:razvan@tcp(127.0.0.1:3306)/clothesAPI")
 	if err != nil {
 		log.Fatal("Eroare la conectarea la baza de date")
 	}
